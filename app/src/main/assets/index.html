@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>IPTV Master Dashboard Pro</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="background-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IPTV Master">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #1e293b;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --danger: #ef4444;
+            --whatsapp: #25d366;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--secondary);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--primary);
+        }
+
+        .saved-lists-container {
+            margin-top: 20px;
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .saved-list-item {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+        }
+
+        .saved-list-item.active-list {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.15);
+        }
+
+        .saved-list-item:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .list-actions { display: flex; gap: 8px; }
+        .action-icon { cursor: pointer; transition: 0.2s; opacity: 0.7; }
+        .action-icon:hover { opacity: 1; transform: scale(1.1); }
+        .delete-list-btn { color: var(--danger); }
+        .download-list-btn { color: var(--primary); }
+
+        .saved-lists-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .clear-all-btn { color: var(--text-dim); cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .clear-all-btn:hover { color: var(--danger); transform: scale(1.1); }
+
+        .empty-hint { font-size: 12px; color: var(--text-dim); padding: 10px; }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header-actions {
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid #334155;
+        }
+
+        .input-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+        .input-group label { font-size: 11px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+
+        input[type="text"], select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid #334155;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: white;
+            outline: none;
+            font-family: inherit;
+        }
+
+        select option { background: var(--bg); color: white; }
+        select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-extract {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 30px;
+            height: 48px;
+            align-self: flex-end;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-extract:disabled { opacity: 0.6; cursor: wait; }
+
+        .status-msg {
+            margin-top: 15px;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: none;
+        }
+        .status-msg.error { display: block; background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .status-msg.info { display: block; background: rgba(14,165,233,0.12); color: #93cceb; border: 1px solid rgba(14,165,233,0.3); }
+
+        .proxy-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #334155;
+        }
+
+        .proxy-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: var(--bg);
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .proxy-toggle-btn:hover { border-color: var(--primary); }
+
+        .proxy-toggle-btn.proxy-on {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.12);
+        }
+
+        .proxy-toggle-btn.proxy-off {
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .proxy-toggle-info { display: flex; flex-direction: column; line-height: 1.3; }
+        .proxy-toggle-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
+        .proxy-toggle-desc { font-size: 11px; color: var(--text-dim); }
+        .proxy-toggle-desc span { font-weight: 700; }
+        .proxy-toggle-desc .on { color: var(--primary); }
+        .proxy-toggle-desc .off { color: var(--danger); }
+
+        /* Filter Section */
+        .filter-section {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Channel Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .no-results { color: var(--text-dim); font-size: 14px; grid-column: 1 / -1; text-align: center; padding: 40px 0; }
+
+        .channel-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .channel-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .channel-img { width: 100%; height: 140px; background: #000; display: flex; align-items: center; justify-content: center; }
+        .channel-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .channel-info { padding: 15px; text-align: center; }
+        .channel-name { font-weight: 600; font-size: 14px; margin-bottom: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .btn-play {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .btn-mx { background: #fbbf24; color: #000; border: none; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        /* Reproductor Modal */
+        #playerModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        video { width: 90%; max-width: 1000px; background: #000; }
+        .close-player { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--whatsapp);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; max-height: 60vh; }
+            .main-content { padding: 20px; }
+            .filter-section { flex-direction: column; }
+        }
+
+        @media (max-width: 480px) {
+            .main-content { padding: 14px; }
+            .header-actions { padding: 16px; border-radius: 14px; }
+            .btn-extract { padding: 0 18px; font-size: 13px; }
+            .channel-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+            .channel-img { height: 100px; }
+            .whatsapp-float { width: 50px; height: 50px; font-size: 24px; bottom: 16px; right: 16px; }
+        }
+
+        /* Respect iOS notches / home indicator */
+        .sidebar { padding-top: max(30px, env(safe-area-inset-top)); }
+        .whatsapp-float {
+            bottom: max(30px, calc(20px + env(safe-area-inset-bottom)));
+            right: max(30px, env(safe-area-inset-right));
+        }
+
+        /* Install PWA button */
+        .install-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .install-btn:hover { background: rgba(14, 165, 233, 0.22); }
+        .install-btn.visible { display: flex; }
+
+        .ios-install-hint {
+            display: none;
+            font-size: 11px;
+            color: var(--text-dim);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .ios-install-hint.visible { display: block; }
+        .ios-install-hint i { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-tv"></i> IPTV MASTER</div>
+
+        <button type="button" class="install-btn" id="installBtn">
+            <i class="fas fa-download"></i> Instalar App
+        </button>
+        <div class="ios-install-hint" id="iosInstallHint">
+            <i class="fas fa-share-from-square"></i>
+            Para instalar en iPhone/iPad: toca <b>Compartir</b> en Safari y luego <b>"Agregar a pantalla de inicio"</b>.
+        </div>
+
+        <div class="nav-item active" onclick="location.reload()"><i class="fas fa-home"></i> Inicio</div>
+        <div class="saved-lists-container">
+            <div class="saved-lists-header">
+                <h4 style="font-size: 11px; color: var(--primary);">LISTAS GUARDADAS</h4>
+                <i class="fas fa-trash-can-arrow-up clear-all-btn" id="clearAllBtn" title="Eliminar todas las listas guardadas"></i>
+            </div>
+            <div id="savedLists"></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-actions">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Nombre de la lista</label>
+                    <input type="text" id="listName" placeholder="Ej: Deportes VIP">
+                </div>
+                <div class="input-group">
+                    <label>URL M3U</label>
+                    <input type="text" id="m3uUrl" placeholder="http://...">
+                </div>
+                <button class="btn-extract" id="extractBtn">GUARDAR Y EXTRAER</button>
+            </div>
+            <div class="status-msg" id="statusMsg"></div>
+
+            <div class="proxy-toggle-row">
+                <button type="button" class="proxy-toggle-btn" id="proxyToggleBtn" title="Activar/Desactivar proxy">
+                    <i class="fas fa-server" id="proxyToggleIcon"></i>
+                </button>
+                <div class="proxy-toggle-info">
+                    <span class="proxy-toggle-title">Proxy CORS</span>
+                    <span class="proxy-toggle-desc">Estado: <span id="proxyStatusText"></span> · usado al extraer y descargar listas</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section" id="filterArea" style="display: none;">
+            <div class="input-group">
+                <label>Seleccionar Grupo / Categoría</label>
+                <select id="selectGroup"></select>
+            </div>
+            <div class="input-group">
+                <label>Seleccionar Canal</label>
+                <select id="selectChannel"></select>
+            </div>
+        </div>
+
+        <div id="channelGrid" class="channel-grid"></div>
+    </main>
+
+    <div id="playerModal">
+        <span class="close-player" onclick="closePlayer()">&times;</span>
+        <video id="videoPlayer" controls autoplay></video>
+    </div>
+
+    <a href="https://wa.me/593964867240" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        const PROXY = "https://proxy-sage-nine-88.vercel.app/api/proxy?url=";
+        const ALL_GROUP_LABEL = "Todos los Canales";
+
+        let hls = null;
+        let allChannels = [];
+        let groupedChannels = {};
+        let currentListUrl = "";
+        let useProxy = localStorage.getItem('iptv_use_proxy') !== 'false'; // default: ON
+
+        const $ = (id) => document.getElementById(id);
+
+        // Builds the actual fetch/download URL depending on whether the
+        // proxy toggle is enabled. When disabled, the raw URL is used
+        // directly (only works if the source already allows CORS).
+        function buildRequestUrl(url) {
+            return useProxy ? PROXY + encodeURIComponent(url) : url;
+        }
+
+        function updateProxyToggleUI() {
+            const btn = $('proxyToggleBtn');
+            const statusText = $('proxyStatusText');
+
+            btn.classList.toggle('proxy-on', useProxy);
+            btn.classList.toggle('proxy-off', !useProxy);
+            btn.title = useProxy ? "Proxy activado (clic para desactivar)" : "Proxy desactivado (clic para activar)";
+
+            statusText.innerHTML = useProxy
+                ? '<span class="on">Activado</span>'
+                : '<span class="off">Desactivado</span>';
+        }
+
+        function toggleProxy() {
+            useProxy = !useProxy;
+            localStorage.setItem('iptv_use_proxy', String(useProxy));
+            updateProxyToggleUI();
+            showStatus(
+                useProxy
+                    ? "Proxy activado. Las listas se cargarán a través de " + PROXY.split('?')[0]
+                    : "Proxy desactivado. Las listas se cargarán directo desde su URL original (puede fallar por CORS).",
+                "info"
+            );
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function showStatus(msg, type) {
+            const el = $('statusMsg');
+            el.textContent = msg;
+            el.className = "status-msg " + (type || "info");
+        }
+
+        function clearStatus() {
+            const el = $('statusMsg');
+            el.textContent = "";
+            el.className = "status-msg";
+        }
+
+        function setLoading(isLoading) {
+            const btn = $('extractBtn');
+            btn.textContent = isLoading ? "CARGANDO..." : "GUARDAR Y EXTRAER";
+            btn.disabled = isLoading;
+        }
+
+        async function handleNewList() {
+            const nameEl = $('listName');
+            const urlEl = $('m3uUrl');
+            const name = nameEl.value.trim() || "Lista Nueva";
+            const url = urlEl.value.trim();
+
+            if (!url) {
+                showStatus("Ingresa una URL M3U válida.", "error");
+                return;
+            }
+
+            const ok = await loadList(url, name);
+            if (ok) {
+                saveListToStorage(name, url);
+                nameEl.value = "";
+                urlEl.value = "";
+            }
+        }
+
+        async function loadList(url, name) {
+            setLoading(true);
+            clearStatus();
+
+            try {
+                const response = await fetch(buildRequestUrl(url));
+                if (!response.ok) throw new Error((useProxy ? "Proxy" : "Fetch directo") + " error " + response.status);
+                const data = await response.text();
+
+                if (!data || !data.includes('#EXTM3U') && !data.includes('#EXTINF')) {
+                    throw new Error("La respuesta no parece ser una lista M3U válida.");
+                }
+
+                currentListUrl = url;
+                parseM3U(data);
+
+                if (allChannels.length === 0) {
+                    showStatus("La lista se cargó pero no se encontraron canales.", "error");
+                } else {
+                    showStatus(`Lista "${name || 'sin nombre'}" cargada: ${allChannels.length} canales.`, "info");
+                }
+
+                $('filterArea').style.display = 'flex';
+                highlightActiveList(url);
+                return true;
+            } catch (err) {
+                showStatus("Error al cargar la lista. Verifica la URL o el proxy. (" + err.message + ")", "error");
+                return false;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function parseM3U(content) {
+            const lines = content.split('\n');
+            allChannels = [];
+            groupedChannels = {};
+            groupedChannels[ALL_GROUP_LABEL] = [];
+
+            let tempChannel = null;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                if (line.startsWith('#EXTINF')) {
+                    // Only split on the FIRST comma; channel names can contain commas.
+                    const commaIndex = line.indexOf(',');
+                    const name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : "Canal sin nombre";
+                    const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+                    const groupMatch = line.match(/group-title="([^"]*)"/);
+
+                    const group = (groupMatch && groupMatch[1].trim()) ? groupMatch[1].trim() : "Sin Categoría";
+                    tempChannel = { name: name || "Canal sin nombre", logo: logoMatch ? logoMatch[1] : "", group };
+
+                    if (!groupedChannels[group]) groupedChannels[group] = [];
+                } else if (line.startsWith('#')) {
+                    // Ignore other metadata tags (#EXTGRP, #EXTVLCOPT, #EXTM3U, etc.)
+                } else if (tempChannel) {
+                    // Treat any non-# line following an #EXTINF as the stream URL,
+                    // covers http(s), rtmp, rtsp, udp, etc.
+                    tempChannel.url = line;
+                    const ch = { ...tempChannel, id: Math.random().toString(36).slice(2, 11) };
+                    allChannels.push(ch);
+                    groupedChannels[ALL_GROUP_LABEL].push(ch);
+                    groupedChannels[ch.group].push(ch);
+                    tempChannel = null;
+                }
+            });
+
+            populateGroups();
+        }
+
+        function populateGroups() {
+            const select = $('selectGroup');
+            const otherGroups = Object.keys(groupedChannels)
+                .filter(g => g !== ALL_GROUP_LABEL)
+                .sort((a, b) => a.localeCompare(b));
+            const groups = [ALL_GROUP_LABEL, ...otherGroups];
+
+            select.innerHTML = groups
+                .map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)} (${groupedChannels[g].length})</option>`)
+                .join('');
+
+            select.value = ALL_GROUP_LABEL;
+            filterChannelsByGroup();
+        }
+
+        // Only rebuilds the channel <select> for the chosen group.
+        // Does NOT render the grid — rendering every channel of a group
+        // (some lists have thousands) is what caused the lag/high memory
+        // use. The grid only fills in when a specific channel is picked.
+        function filterChannelsByGroup() {
+            const group = $('selectGroup').value;
+            const channels = (groupedChannels[group] || []).slice()
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const channelSelect = $('selectChannel');
+            channelSelect.innerHTML = `<option value="">Selecciona un canal...</option>` +
+                channels.map(ch => `<option value="${ch.id}">${escapeHtml(ch.name)}</option>`).join('');
+            channelSelect.disabled = channels.length === 0;
+
+            renderPickAHint(channels.length);
+        }
+
+        function showSelectedChannel() {
+            const id = $('selectChannel').value;
+            if (!id) {
+                const group = $('selectGroup').value;
+                const count = (groupedChannels[group] || []).length;
+                renderPickAHint(count);
+                return;
+            }
+
+            const channel = allChannels.find(ch => ch.id === id);
+            renderGrid(channel ? [channel] : []);
+        }
+
+        function renderPickAHint(channelCountInGroup) {
+            const grid = $('channelGrid');
+            grid.innerHTML = channelCountInGroup > 0
+                ? `<div class="no-results"><i class="fas fa-hand-pointer"></i> Elige un canal en el segundo select para verlo aquí (${channelCountInGroup} disponibles en este grupo).</div>`
+                : `<div class="no-results">No hay canales en esta categoría.</div>`;
+        }
+
+        function renderGrid(channels) {
+            const grid = $('channelGrid');
+
+            if (!channels || channels.length === 0) {
+                grid.innerHTML = `<div class="no-results">No hay canales en esta categoría.</div>`;
+                return;
+            }
+
+            grid.innerHTML = channels.map(ch => `
+                <div class="channel-card">
+                    <div class="channel-img">
+                        <img src="${escapeHtml(ch.logo)}" alt="${escapeHtml(ch.name)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/200x140?text=TV'">
+                    </div>
+                    <div class="channel-info">
+                        <span class="channel-name" title="${escapeHtml(ch.name)}">${escapeHtml(ch.name)}</span>
+                        <button class="btn-play" data-url="${escapeHtml(ch.url)}">REPRODUCIR</button>
+                        <button class="btn-mx" data-url="${escapeHtml(ch.url)}">ABRIR EN MX</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Event delegation for dynamically created play/MX buttons (avoids
+        // breaking on quotes/special characters inside URLs).
+        $('channelGrid').addEventListener('click', (e) => {
+            const playBtn = e.target.closest('.btn-play');
+            const mxBtn = e.target.closest('.btn-mx');
+            if (playBtn) playStream(playBtn.dataset.url);
+            if (mxBtn) openMX(mxBtn.dataset.url);
+        });
+
+        function playStream(url) {
+            const modal = $('playerModal');
+            const video = $('videoPlayer');
+            modal.style.display = 'flex';
+            if (hls) { hls.destroy(); hls = null; }
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+        }
+
+        function closePlayer() {
+            $('playerModal').style.display = 'none';
+            const video = $('videoPlayer');
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+            if (hls) { hls.destroy(); hls = null; }
+        }
+
+        function openMX(url) {
+            window.location.href = `intent:${url}#Intent;package=com.mxtech.videoplayer.ad;S.title=IPTV;end`;
+        }
+
+        function getStoredLists() {
+            try {
+                return JSON.parse(localStorage.getItem('iptv_master_history') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveListToStorage(name, url) {
+            let lists = getStoredLists();
+            const existing = lists.find(l => l.url === url);
+            if (existing) {
+                existing.name = name; // update name if re-saved
+            } else {
+                lists.push({ name, url });
+            }
+            localStorage.setItem('iptv_master_history', JSON.stringify(lists));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const lists = getStoredLists();
+            const container = $('savedLists');
+
+            if (lists.length === 0) {
+                container.innerHTML = `<div class="empty-hint">Aún no hay listas guardadas.</div>`;
+                return;
+            }
+
+            container.innerHTML = lists.map((list, index) => `
+                <div class="saved-list-item" data-url="${escapeHtml(list.url)}" data-index="${index}">
+                    <span><i class="fas fa-file-alt"></i> ${escapeHtml(list.name)}</span>
+                    <div class="list-actions">
+                        <i class="fas fa-download download-list-btn action-icon" title="Descargar"></i>
+                        <i class="fas fa-trash delete-list-btn action-icon" title="Eliminar"></i>
+                    </div>
+                </div>
+            `).join('');
+
+            highlightActiveList(currentListUrl);
+        }
+
+        $('savedLists').addEventListener('click', (e) => {
+            const item = e.target.closest('.saved-list-item');
+            if (!item) return;
+            const url = item.dataset.url;
+            const index = Number(item.dataset.index);
+            const lists = getStoredLists();
+            const list = lists[index];
+
+            if (e.target.closest('.delete-list-btn')) {
+                e.stopPropagation();
+                deleteList(index);
+                return;
+            }
+            if (e.target.closest('.download-list-btn')) {
+                e.stopPropagation();
+                downloadManual(url, list ? list.name : 'lista');
+                return;
+            }
+            loadList(url, list ? list.name : '');
+        });
+
+        function highlightActiveList(url) {
+            document.querySelectorAll('.saved-list-item').forEach(el => {
+                el.classList.toggle('active-list', el.dataset.url === url);
+            });
+        }
+
+        function deleteList(index) {
+            let lists = getStoredLists();
+            lists.splice(index, 1);
+            localStorage.setItem('iptv_master_history', JSON.stringify(lists));
+            renderHistory();
+        }
+
+        function clearAllLists() {
+            const lists = getStoredLists();
+            if (lists.length === 0) return;
+
+            const confirmed = confirm(`¿Eliminar las ${lists.length} listas guardadas? Esta acción no se puede deshacer.`);
+            if (!confirmed) return;
+
+            localStorage.removeItem('iptv_master_history');
+            currentListUrl = "";
+            allChannels = [];
+            groupedChannels = {};
+            $('filterArea').style.display = 'none';
+            $('channelGrid').innerHTML = '';
+            $('selectGroup').innerHTML = '';
+            $('selectChannel').innerHTML = '';
+            clearStatus();
+            renderHistory();
+        }
+
+        function downloadManual(url, name) {
+            const link = buildRequestUrl(url);
+            const a = document.createElement('a');
+            a.href = link;
+            a.download = (name || 'lista') + ".m3u";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        $('extractBtn').addEventListener('click', handleNewList);
+        $('selectGroup').addEventListener('change', filterChannelsByGroup);
+        $('selectChannel').addEventListener('change', showSelectedChannel);
+        $('proxyToggleBtn').addEventListener('click', toggleProxy);
+        $('clearAllBtn').addEventListener('click', clearAllLists);
+
+        // ---------- PWA: install prompt (Android/desktop Chrome/Edge) ----------
+        let deferredInstallPrompt = null;
+
+        function isStandaloneMode() {
+            return window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone === true; // iOS Safari
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            if (!isStandaloneMode()) $('installBtn').classList.add('visible');
+        });
+
+        $('installBtn').addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            $('installBtn').classList.remove('visible');
+            showStatus(
+                outcome === 'accepted' ? "App instalada correctamente." : "Instalación cancelada.",
+                "info"
+            );
+        });
+
+        window.addEventListener('appinstalled', () => {
+            $('installBtn').classList.remove('visible');
+            $('iosInstallHint').classList.remove('visible');
+        });
+
+        // ---------- PWA: manual instructions for iOS (no beforeinstallprompt there) ----------
+        function isIOS() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent)
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS
+        }
+
+        if (isIOS() && !isStandaloneMode()) {
+            $('iosInstallHint').classList.add('visible');
+        }
+
+        // ---------- PWA: service worker registration ----------
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js').catch(() => {
+                    // Fails silently if served from file:// or an origin
+                    // that doesn't support service workers.
+                });
+            });
+        }
+
+        // Empieza en blanco: no se auto-carga ninguna lista de ejemplo.
+        // Solo se muestra el historial guardado (si existe) a la espera
+        // de que el usuario extraiga o elija una lista.
+        window.onload = () => {
+            updateProxyToggleUI();
+            renderHistory();
+        };
+    </script>
+</body>
+</html>
