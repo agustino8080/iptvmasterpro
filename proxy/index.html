@@ -62,7 +62,7 @@
         <div class="sidebar" id="cats"></div>
         <div class="main">
             <div class="player-wrap">
-                <video id="player" controls autoplay playsinline></video>
+                <video id="video" controls autoplay playsinline></video>
             </div>
             <div id="content" class="grid"></div>
         </div>
@@ -98,7 +98,9 @@
     // --- Core Logic ---
     function setStatus(msg, type='info') {
         const s = document.getElementById('status');
+        if (!msg) { s.style.display = 'none'; return; }
         s.innerHTML = msg; s.className = 'status ' + type;
+        s.style.display = 'block';
     }
 
     function analyze(isLive) {
@@ -107,6 +109,8 @@
 
         if (raw.match(/\.(mkv|mp4|ts|avi|m3u8)/i)) {
             document.getElementById('directBox').style.display = 'block';
+        } else {
+            document.getElementById('directBox').style.display = 'none';
         }
 
         try {
@@ -148,6 +152,7 @@
             render(categories, isLive);
             document.getElementById('app').style.display = 'grid';
             setStatus("✅ Datos cargados correctamente.", "info");
+            setTimeout(() => setStatus(""), 3000);
         } catch(err) {
             setStatus("❌ El servidor IPTV o el proxy rechazaron la conexión.", "error");
         }
@@ -192,17 +197,46 @@
     }
 
     function play(url) {
-        const video = document.getElementById('player');
-        if (hls) hls.destroy();
+        const video = document.getElementById('video');
+        if (hls) { hls.destroy(); hls = null; }
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+
         if (url.includes('.m3u8') && Hls.isSupported()) {
-            hls = new Hls();
+            hls = new Hls({
+                maxBufferLength: 30,
+                maxMaxBufferLength: 60,
+                enableWorker: true
+            });
             hls.loadSource(url);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+
+            // Lógica de recuperación si se corta
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            play(url); // Reintento total
+                            break;
+                    }
+                }
+            });
         } else {
             video.src = url;
-            video.play().catch(() => alert("Error al reproducir. Prueba en VLC."));
+            video.play().catch(() => {
+                alert("Error al reproducir. Algunos formatos como MKV no son compatibles con navegadores. Usa VLC.");
+                window.location.href = "vlc://" + url;
+            });
         }
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
     function playDirect() {
