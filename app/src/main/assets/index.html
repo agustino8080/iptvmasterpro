@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTRA HUB MASTER - FULL VERSION</title>
+    <title>ULTRA HUB MASTER - SEARCH EDITION</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,18 +14,30 @@
             background-image: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .header { width: 100%; text-align: center; padding: 15px; border-bottom: 2px solid var(--cyan); background: rgba(15, 23, 42, 0.9); }
-        h1 { font-size: 1rem; color: var(--cyan); letter-spacing: 3px; }
+        .header { width: 100%; text-align: center; padding: 15px; border-bottom: 2px solid var(--cyan); background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 1000; }
+        h1 { font-size: 0.9rem; color: var(--cyan); letter-spacing: 2px; margin-bottom: 10px; }
+
+        /* BUSCADOR */
+        .search-container { width: 90%; max-width: 600px; margin: 10px auto; position: relative; }
+        .search-input {
+            width: 100%; padding: 12px 20px 12px 45px; border-radius: 30px; border: 1px solid var(--cyan);
+            background: rgba(0,0,0,0.8); color: white; font-family: inherit; font-size: 0.8rem;
+            outline: none; box-shadow: 0 0 15px rgba(0,243,255,0.2); transition: 0.3s;
+        }
+        .search-input:focus { box-shadow: 0 0 25px rgba(0,243,255,0.5); border-color: white; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--cyan); }
 
         .controls-grid {
-            width: 98%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            width: 98%; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 10px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 20px; margin-top: 10px;
         }
         .select-group { display: flex; flex-direction: column; gap: 4px; }
-        label { font-size: 0.55rem; color: var(--cyan); text-transform: uppercase; }
+        .select-group.search-results { grid-column: 1 / -1; margin-bottom: 10px; display: none; }
+
+        label { font-size: 0.5rem; color: var(--cyan); text-transform: uppercase; }
         select {
             background: #000; border: 1px solid var(--purple); color: #fff; padding: 8px;
-            border-radius: 8px; font-size: 0.7rem; outline: none;
+            border-radius: 8px; font-size: 0.7rem; outline: none; cursor: pointer;
         }
 
         .player-wrapper { width: 95%; aspect-ratio: 16/9; background: #000; margin-top: 15px; border-radius: 15px; overflow: hidden; border: 1px solid var(--cyan); position: relative; }
@@ -35,9 +47,8 @@
         .btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
         .btn-play { background: linear-gradient(45deg, #1e40af, #3b82f6); }
         .btn-vlc { background: linear-gradient(45deg, #ea580c, #f97316); }
-        #status { font-size: 0.65rem; color: var(--cyan); margin-top: 5px; }
+        #status { font-size: 0.65rem; color: var(--cyan); margin-top: 5px; text-align: center; }
 
-        /* M3U Data Containers (Hidden) */
         .m3u-data { display: none; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -46,11 +57,22 @@
 
     <div class="header">
         <h1><i class="fas fa-microchip"></i> IPTV MASTER HUB PRO</h1>
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="mainSearch" placeholder="BUSCAR CANAL EN TODOS LOS SERVIDORES..." oninput="doSearch()">
+        </div>
         <div id="status">SISTEMA ONLINE - CARGANDO CANALES...</div>
     </div>
 
-    <div class="controls-grid" id="masterGrid">
-        <!-- Los selects se generarán aquí -->
+    <div class="controls-grid">
+        <!-- Grupo especial para resultados de búsqueda -->
+        <div class="select-group search-results" id="searchGroup">
+            <label style="color: #39ff14;"><i class="fas fa-poll-h"></i> RESULTADOS ENCONTRADOS</label>
+            <select id="searchSelect" onchange="useSearchResult()" style="border-color: #39ff14; background: rgba(0,50,0,0.5);">
+                <option value="">-- SELECCIONA UN RESULTADO --</option>
+            </select>
+        </div>
+        <div id="masterGrid" style="display: contents;"></div>
     </div>
 
     <div class="player-wrapper">
@@ -63,8 +85,7 @@
     </div>
 
     <!-- BLOQUES DE DATOS COMPLETOS -->
-    <pre id="data-latino1" class="m3u-data">
-#EXTM3U
+    <pre id="data-latino1" class="m3u-data">#EXTM3U
 #EXTINF:11,24 HORAS
 http://186.148.196.250:81/play/a0no/index.m3u8
 #EXTINF:0,A&E
@@ -339,6 +360,8 @@ http://186.148.196.250:81/play/a0nh/index.m3u8
 http://186.148.196.250:81/play/a0ck/index.m3u8
 #EXTINF:11,TNT Sports Premiun HD
 http://186.148.196.250:81/play/a0cq/index.m3u8
+#EXTINF:0,TV Per#EXTVLCOPT:network-caching=1000
+http://186.148.196.250:81/play/a0o0/index.m3u8
 #EXTINF:0,TVN
 http://186.148.196.250:81/play/a0nd/index.m3u8
 #EXTINF:0,Teleamazonas
@@ -353,6 +376,12 @@ http://186.148.196.250:81/play/a07t/index.m3u8
 http://186.148.196.250:81/play/a0ib/index.m3u8
 #EXTINF:0,USA
 http://186.148.196.250:81/play/a0mc/index.m3u8
+#EXTINF:0,Universal Cinema SD
+http://186.148.196.250:81/play/a0ns/index.m3u8
+#EXTINF:0,Universal Comedy SD
+http://186.148.196.250:81/play/a0nt/index.m3u8
+#EXTINF:0,Universal Premiere SD
+http://186.148.196.250:81/play/a0nr/index.m3u8
 #EXTINF:0,Via X
 http://186.148.196.250:81/play/a0lr/index.m3u8
 #EXTINF:11,Via X Esports
@@ -363,16 +392,122 @@ http://186.148.196.250:81/play/a0fw/index.m3u8
 http://186.148.196.250:81/play/a0o7/index.m3u8
 #EXTINF:0,Zona Latina
 http://186.148.196.250:81/play/a0lq/index.m3u8
+#EXTINF:0,AMC Series
+http://186.148.196.82:8001/play/a0c8
+#EXTINF:0,AMERICA TV HD
+http://186.148.196.82:8001/play/a0c1
+#EXTINF:0,ATV
+http://186.148.196.82:8001/play/a0cv
+#EXTINF:0,ATV HD
+http://186.148.196.82:8001/play/a0d6
+#EXTINF:0,Adult swim HD
+http://186.148.196.82:8001/play/a0au
+#EXTINF:0,America TV HD
+http://186.148.196.82:8001/play/a08c
+#EXTINF:0,CABLE TACNA TV
+http://186.148.196.82:8001/play/a0az
+#EXTINF:0,CANAL CONGRESO
+http://186.148.196.82:8001/play/a0ax
+#EXTINF:0,CANAL DRAMA HD
+http://186.148.196.82:8001/play/a0a9
+#EXTINF:0,CARTOON NETWORK HD
+http://186.148.196.82:8001/play/a0ab
+#EXTINF:0,CINE SONY
+http://186.148.196.82:8001/play/a0a4
+#EXTINF:0,CINEMAX HD
+http://186.148.196.82:8001/play/a09r
+#EXTINF:0,CT DEPORTES HD
+http://186.148.196.82:8001/play/a09o
+#EXTINF:0,Canal N
+http://186.148.196.82:8001/play/a0cn
+#EXTINF:0,Cartoon Network HD
+http://186.148.196.82:8001/play/a0b1
+#EXTINF:0,Clover
+http://186.148.196.82:8001/play/a0cj
+#EXTINF:0,DIRECTV 1604 HD
+http://186.148.196.82:8001/play/a096
+#EXTINF:0,DIRECTV 1612 HD
+http://186.148.196.82:8001/play/dhehd
+#EXTINF:0,DIRECTV SPORT 2 HD
+http://186.148.196.82:8001/play/a0ae
+#EXTINF:0,DSports HD
+http://186.148.196.82:8001/play/a0d5
+#EXTINF:0,ESPN1 HD
+http://186.148.196.82:8001/play/a0bo
+#EXTINF:0,EXITOSA HD
+http://186.148.196.82:8001/play/a0b5
+#EXTINF:0,EXITOSA HD M3U
+http://186.148.196.82:8001/play/a07z
+#EXTINF:0,Europa Europa
+http://186.148.196.82:8001/play/a0cb
+#EXTINF:0,Exitosa TV
+http://186.148.196.82:8001/play/a0co
+#EXTINF:0,Film & Arts HD
+http://186.148.196.82:8001/play/a0as
+#EXTINF:0,GLOBAL
+http://186.148.196.82:8001/play/a0cs
+#EXTINF:0,GLOBAL HD
+http://186.148.196.82:8001/play/a0bm
 #EXTINF:0,GOLPERU 714 HD
 http://186.148.196.82:8001/play/golperu
+#EXTINF:0,Golden Edge
+http://186.148.196.82:8001/play/a0ca
+#EXTINF:0,Golden HD
+http://186.148.196.82:8001/play/a0c6
+#EXTINF:0,HBO Mundi
+http://186.148.196.82:8001/play/a0cu
+#EXTINF:0,HBO Signature
+http://186.148.196.82:8001/play/a0ct
+#EXTINF:0,HTV
+http://186.148.196.82:8001/play/a0c9
+#EXTINF:0,History 2
+http://186.148.196.82:8001/play/a0ck
+#EXTINF:0,L1
+http://186.148.196.82:8001/play/a0d9
 #EXTINF:0,LIGA 1 MAX
 http://186.148.196.82:8001/play/ligamax1
+#EXTINF:0,Las Estrellas
+http://186.148.196.82:8001/play/a0bq
+#EXTINF:0,Latina HD
+http://186.148.196.82:8001/play/a08d
+#EXTINF:0,NICK JR HD
+http://186.148.196.82:8001/play/a0ay
+#EXTINF:0,PANAMERICANA HD
+http://186.148.196.82:8001/play/a0a8
+#EXTINF:0,PASIONES HD
+http://186.148.196.82:8001/play/pasiones
+#EXTINF:0,PBO HD
+http://186.148.196.82:8001/play/a0aa
+#EXTINF:0,Plim Plim TV
+http://186.148.196.82:8001/play/a0cm
+#EXTINF:0,RCN EXTRA
+http://186.148.196.82:8001/play/a087
+#EXTINF:0,RPP
+http://186.148.196.82:8001/play/a0cr
+#EXTINF:0,Sony Movies HD
+http://186.148.196.82:8001/play/a0aw
+#EXTINF:0,Stingray Concerts HD
+http://186.148.196.82:8001/play/a08b
+#EXTINF:0,Studio Universal HD
+http://186.148.196.82:8001/play/a0bx
+#EXTINF:0,TELE ESTRELLA TV HD
+http://186.148.196.82:8001/play/a09y
+#EXTINF:0,TLNOVELAS HD
+http://186.148.196.82:8001/play/goldenplush
+#EXTINF:0,TV PERU
+http://186.148.196.82:8001/play/a0ac
+#EXTINF:0,Telesur
+http://186.148.196.82:8001/play/a0cq
+#EXTINF:0,Televisa Telenovelas
+http://186.148.196.82:8001/play/a0a3
 #EXTINF:0,TyC Sports HD
 http://186.148.196.82:8001/play/a0ar
-    </pre>
+#EXTINF:0,WILLAX HD
+http://186.148.196.82:8001/play/a0ad
+#EXTINF:0,Willax
+http://186.148.196.82:8001/play/a0cp</pre>
 
-    <pre id="data-latino2" class="m3u-data">
-#EXTM3U
+    <pre id="data-latino2" class="m3u-data">#EXTM3U
 #EXTINF:0,A&E HD (OLE)
 http://179.63.6.209:8000/play/a006
 #EXTINF:0,AXN HD (OLE)
@@ -784,11 +919,10 @@ http://179.63.6.209:8010/play/a008
 #EXTINF:0,MI MUSICA ROMANTICA HD
 http://179.63.6.209:8010/play/a00b
 #EXTINF:0,MI MUSICA SALSA HD
-http://179.63.6.209:8010/play/a00a
-    </pre>
+http://179.63.6.209:8010/play/a00a</pre>
 
-    <pre id="data-latino3" class="m3u-data">
-#EXTM3U
+    <!-- Resto de bloques como Latino 3, 5, 7, 8, 9, 10, RedBull, etc. -->
+    <pre id="data-latino3" class="m3u-data">#EXTM3U
 #EXTINF:11,A&E
 http://177.10.184.193:8000/play/a04x/index.m3u8
 #EXTINF:0,A&E HD
@@ -1168,11 +1302,9 @@ http://177.10.184.60:8002/play/a00u/index.m3u8
 #EXTINF:0,MC_DEPORTES TVC HD
 http://177.10.184.60:8002/play/a00v/index.m3u8
 #EXTINF:0,MC_TUDN MX HD
-http://177.10.184.60:8002/play/a013/index.m3u8
-    </pre>
+http://177.10.184.60:8002/play/a013/index.m3u8</pre>
 
-    <pre id="data-latino5" class="m3u-data">
-http://103.165.93.31:8095/btv/index.m3u8
+    <pre id="data-latino5" class="m3u-data">http://103.165.93.31:8095/btv/index.m3u8
 http://103.165.93.31:8095/ntv/index.m3u8
 http://103.165.93.31:8095/ptv/index.m3u8
 http://103.165.93.31:8095/tsports/index.m3u8
@@ -1203,78 +1335,43 @@ http://200.77.176.130/SBT/index.m3u8
 http://38.19.41.46:8081/babytv/index.m3u8
 http://38.19.41.46:8081/CINEMAX/index.m3u8
 http://38.19.41.46:8081/ESPN/index.m3u8
-http://38.19.41.46:8081/MTV/index.m3u8
-    </pre>
+http://38.19.41.46:8081/MTV/index.m3u8</pre>
 
-    <pre id="data-redbull" class="m3u-data">
-#EXTINF:-1,Red Bull TV AU
+    <pre id="data-redbull" class="m3u-data">#EXTINF:-1,Red Bull TV AU
 https://db34cc6127ac459db55cab5f97cd66b9.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-680-WORBAUENFAST-WHALETVPLUS/680/whaletvplus/hls/master/playlist.m3u8
 #EXTINF:-1,Red Bull TV BR
-https://d03ae6b5c6724c24867e97a3dc04934a.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-1026-WORBBRPTFAST-WHALETVPLUS/1026/hls/master/playlist.m3u8
-#EXTINF:-1,Red Bull TV DE
-https://46cfeb23c7f74853bba7a256655a3119.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-582-WORBDACHDEFAST-WHALETVPLUS/582/whaletvplus/hls/master/playlist.m3u8
-    </pre>
+https://d03ae6b5c6724c24867e97a3dc04934a.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-1026-WORBBRPTFAST-WHALETVPLUS/1026/hls/master/playlist.m3u8</pre>
 
-    <pre id="data-france" class="m3u-data">
-#EXTINF:0,FRANCE 24 EN
+    <pre id="data-france" class="m3u-data">#EXTINF:0,FRANCE 24 EN
 http://5.180.164.197:8080/FRANCE24EN/index.m3u8
-#EXTINF:0,FRANCE 24 FR
-http://5.180.164.197:8080/FRANCE24FR/index.m3u8
-#EXTINF:0,TV5MONDE
-http://5.180.164.197:8080/TV5MONDE/index.m3u8
+#EXTINF:0,CNN
+http://5.180.164.197:8080/CNN/index.m3u8
 #EXTINF:0,ZDF
-http://5.180.164.197:8080/ZDF/index.m3u8
-    </pre>
+http://5.180.164.197:8080/ZDF/index.m3u8</pre>
 
-    <pre id="data-espana" class="m3u-data">
-#EXTINF:0,La 1
+    <pre id="data-espana" class="m3u-data">#EXTINF:0,La 1
 http://79.112.79.166:8069/udp/239.10.20.5:1234
 #EXTINF:0,Antena 3
 http://79.112.79.166:8069/udp/239.10.20.9:1234
-#EXTINF:0,Cuatro
-http://79.112.79.166:8069/udp/239.10.20.20:1234
 #EXTINF:0,Telecinco
-http://79.112.79.166:8069/udp/239.10.20.19:1234
-    </pre>
+http://79.112.79.166:8069/udp/239.10.20.19:1234</pre>
 
-    <pre id="data-latino7" class="m3u-data">
-http://190.83.85.68/animal_planet/index.m3u8
-http://190.83.85.68/axn/index.m3u8
+    <pre id="data-latino7" class="m3u-data">http://190.83.85.68/animal_planet/index.m3u8
 http://190.83.85.68/hbo/index.m3u8
-http://190.83.2.178:8090/Univision/index.m3u8
-http://190.83.2.182:8090/TUDN/index.m3u8
-    </pre>
+http://190.83.2.182:8090/TUDN/index.m3u8</pre>
 
-    <pre id="data-latino8" class="m3u-data">
-http://45.190.13.8/AnimalPlanetHD/index.m3u8
-http://45.190.13.8/AXNHD/index.m3u8
-http://45.190.13.8/NatGeoHD/index.m3u8
-http://45.190.13.8/UniversalTV/index.m3u8
-    </pre>
+    <pre id="data-latino8" class="m3u-data">http://45.190.13.8/AnimalPlanetHD/index.m3u8
+http://45.190.13.8/UniversalTV/index.m3u8</pre>
 
-    <pre id="data-latino9" class="m3u-data">
-#EXTINF:11,TELESUR HD
+    <pre id="data-latino9" class="m3u-data">#EXTINF:11,TELESUR HD
 http://45.167.2.138:8000/play/a0lg/index.m3u8
-#EXTINF:0,A&E
-http://45.167.2.138:8000/play/a0nz/index.m3u8
 #EXTINF:0,AMC SERIES
-http://45.167.2.138:8000/play/a0t0/index.m3u8
-#EXTINF:0,FOX SPORT
-http://45.167.2.138:8000/play/a0ql/index.m3u8
-#EXTINF:0,L1 MAX
-http://45.167.1.138:8000/play/a05u/index.m3u8
-    </pre>
+http://45.167.2.138:8000/play/a0t0/index.m3u8</pre>
 
-    <pre id="data-latino10" class="m3u-data">
-#EXTINF:0,BabyFirst
+    <pre id="data-latino10" class="m3u-data">#EXTINF:0,BabyFirst
 http://45.181.121.85:25461/test/test/2
-#EXTINF:0,Cartoon Network
-http://45.181.121.85:25461/test/test/4
 #EXTINF:0,HBO HD
-http://45.181.122.46:8090/play/a029/index.m3u8
-#EXTINF:0,Sony HD
-http://45.181.122.46:8090/play/a00e/index.m3u8
-    </pre>
+http://45.181.122.46:8090/play/a029/index.m3u8</pre>
 
     <script>
         const groups = [
@@ -1291,11 +1388,12 @@ http://45.181.122.46:8090/play/a00e/index.m3u8
             { id: "latino10", name: "Latino 10" }
         ];
 
+        let masterChannels = [];
         let currentUrl = "";
         let hls;
         const video = document.getElementById('video');
 
-        function parseBlock(text) {
+        function parseBlock(text, groupName) {
             const lines = text.split('\n');
             const result = [];
             let name = "";
@@ -1306,9 +1404,12 @@ http://45.181.122.46:8090/play/a00e/index.m3u8
                 } else if (line.startsWith('http')) {
                     if (!name) {
                         const parts = line.split('/');
-                        name = parts[parts.length-1].replace('.m3u8','').toUpperCase();
+                        name = (parts[parts.length-1] === 'index.m3u8') ? parts[parts.length-2] : parts[parts.length-1];
+                        name = name.replace('.m3u8','').replace(/_/g,' ').toUpperCase();
                     }
-                    result.push({ name, url: line });
+                    const chObj = { name: name.trim(), url: line, group: groupName };
+                    result.push(chObj);
+                    masterChannels.push(chObj); // Guardar en base de datos global
                     name = "";
                 }
             });
@@ -1318,7 +1419,7 @@ http://45.181.122.46:8090/play/a00e/index.m3u8
         const grid = document.getElementById('masterGrid');
         groups.forEach((g, idx) => {
             const raw = document.getElementById('data-' + g.id).textContent;
-            const channels = parseBlock(raw);
+            const channels = parseBlock(raw, g.name);
 
             const div = document.createElement('div');
             div.className = 'select-group';
@@ -1337,15 +1438,54 @@ http://45.181.122.46:8090/play/a00e/index.m3u8
             });
         });
 
+        function doSearch() {
+            const query = document.getElementById('mainSearch').value.toLowerCase();
+            const searchGroup = document.getElementById('searchGroup');
+            const searchSelect = document.getElementById('searchSelect');
+
+            if (query.length < 2) {
+                searchGroup.style.display = 'none';
+                return;
+            }
+
+            const results = masterChannels.filter(ch => ch.name.toLowerCase().includes(query));
+
+            if (results.length > 0) {
+                searchGroup.style.display = 'flex';
+                searchSelect.innerHTML = `<option value="">-- ${results.length} RESULTADOS --</option>`;
+                results.forEach(ch => {
+                    const opt = document.createElement('option');
+                    opt.value = ch.url;
+                    opt.textContent = `[${ch.group}] ${ch.name}`;
+                    searchSelect.appendChild(opt);
+                });
+            } else {
+                searchGroup.style.display = 'none';
+            }
+        }
+
+        function useSearchResult() {
+            const sel = document.getElementById('searchSelect');
+            if (!sel.value) return;
+            currentUrl = sel.value;
+            // Limpiar otros selects
+            groups.forEach((_, i) => document.getElementById('sel'+i).value = "");
+            document.getElementById('status').textContent = "BUSCADOR: " + sel.options[sel.selectedIndex].text;
+            playNative();
+        }
+
         function changeChannel(idx) {
             groups.forEach((_, i) => { if(i !== idx) document.getElementById('sel'+i).value = ""; });
+            document.getElementById('searchSelect').value = "";
             const s = document.getElementById('sel' + idx);
             currentUrl = s.value;
             document.getElementById('status').textContent = "SELECCIONADO: " + s.options[s.selectedIndex].text;
+            playNative();
         }
 
         function playNative() {
             if(!currentUrl) return;
+            document.getElementById('status').textContent = "CONECTANDO A: " + currentUrl;
             if(hls) hls.destroy();
             if(Hls.isSupported()) {
                 hls = new Hls({maxBufferLength: 30});
