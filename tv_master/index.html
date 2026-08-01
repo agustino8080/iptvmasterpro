@@ -3,102 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ULTRA IPTV PORTAL PRO</title>
+    <title>ULTRA IPTV HUB MAESTRO</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --neon-cyan: #00f3ff;
             --neon-purple: #bc13fe;
-            --neon-green: #39ff14;
             --bg-dark: #020617;
-            --glass: rgba(15, 23, 42, 0.8);
-            --text-glow: 0 0 10px rgba(0, 243, 255, 0.5);
+            --glass: rgba(15, 23, 42, 0.85);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
-            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-dark);
-            background-image:
-                radial-gradient(at 0% 0%, rgba(188, 19, 254, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(0, 243, 255, 0.15) 0px, transparent 50%);
+            background-image: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
             color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
         }
 
-        .container {
-            width: 95%;
-            max-width: 1300px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .container { width: 95%; max-width: 1400px; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        .header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            text-align: center;
-        }
+        header { text-align: center; padding: 10px; border-bottom: 2px solid var(--neon-cyan); box-shadow: 0 0 20px rgba(0,243,255,0.2); border-radius: 15px; background: var(--glass); }
+        h1 { font-size: 1.2rem; letter-spacing: 3px; color: var(--neon-cyan); text-transform: uppercase; }
 
-        .logo {
-            width: 70px;
-            height: 70px;
-            filter: drop-shadow(0 0 15px var(--neon-cyan));
-            animation: pulse 2s infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.8; }
-            to { transform: scale(1.1); opacity: 1; }
-        }
-
-        h1 {
-            font-size: 1.4rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: var(--neon-cyan);
-            text-shadow: var(--text-glow);
-        }
-
-        /* Controls Area */
-        .controls-card {
+        /* Grid de Selects */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
             background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .select-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        label {
-            font-size: 0.6rem;
-            color: var(--neon-cyan);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-left: 5px;
-        }
+        .select-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 0.6rem; color: var(--neon-cyan); text-transform: uppercase; font-weight: bold; margin-left: 5px; }
 
         select {
             width: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0,0,0,0.6);
             border: 1px solid var(--neon-purple);
             color: #fff;
             padding: 8px;
@@ -106,187 +55,157 @@
             font-size: 0.75rem;
             outline: none;
             cursor: pointer;
-            font-family: inherit;
-            transition: 0.3s;
         }
-
-        select:focus { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
-        select option { background: var(--bg-dark); color: #fff; }
+        select:focus { border-color: var(--neon-cyan); }
 
         .action-area {
             grid-column: 1 / -1;
             display: flex;
             gap: 10px;
+            margin-top: 5px;
         }
 
         .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.3s;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            color: white;
+            flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; color: white; text-transform: uppercase; font-size: 0.75rem;
         }
-
         .btn-native { background: linear-gradient(45deg, #1e40af, #3b82f6); }
         .btn-vlc { background: linear-gradient(45deg, #ea580c, #f97316); }
 
-        .btn:hover { transform: scale(1.02); filter: brightness(1.2); }
-
         /* Player Area */
         .player-wrapper {
-            position: relative;
             width: 100%;
             aspect-ratio: 16/9;
             background: #000;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
             border: 1px solid var(--neon-cyan);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+            position: relative;
         }
-
         video { width: 100%; height: 100%; }
 
-        .status-bar {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 8px 20px;
-            border-radius: 10px;
+        #status {
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            border-radius: 8px;
             font-size: 0.7rem;
             color: var(--neon-cyan);
-            border: 1px solid rgba(0, 243, 255, 0.3);
             text-align: center;
         }
 
-        @media (max-width: 600px) {
-            .action-area { flex-direction: column; }
-            .controls-card { grid-template-columns: 1fr; }
+        #interactionShield {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            background: rgba(0,0,0,0.01); cursor: pointer; display: none;
         }
+        .unlock-btn {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--neon-cyan); color: #000; padding: 12px 20px; border-radius: 50px; font-weight: bold;
+        }
+
+        @media (max-width: 600px) { h1 { font-size: 1rem; } .action-area { flex-direction: column; } }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="container">
-        <header class="header">
-            <img src="https://cdn-icons-png.flaticon.com/512/716/716429.png" class="logo" alt="logo">
-            <h1>ULTRA IPTV PRO</h1>
-        </header>
+<div class="container">
+    <header>
+        <h1><i class="fas fa-microchip"></i> ULTRA IPTV MASTER HUB</h1>
+    </header>
 
-        <div class="controls-card">
-            <div class="select-group">
-                <label><i class="fas fa-globe"></i> International</label>
-                <select id="intlSelect" onchange="updateSelection('intl')"><option value="">-- CHOOSE --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-flag-checkered"></i> Italy 1</label>
-                <select id="itSelect" onchange="updateSelection('it')"><option value="">-- SCEGLI --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-flag"></i> Italy 2</label>
-                <select id="it2Select" onchange="updateSelection('it2')"><option value="">-- SCEGLI 2 --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-star"></i> Latino 1</label>
-                <select id="latSelect" onchange="updateSelection('lat')"><option value="">-- SELECT --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-satellite"></i> Latino 2</label>
-                <select id="lat2Select" onchange="updateSelection('lat2')"><option value="">-- SELECT --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-bolt"></i> Latino 3</label>
-                <select id="lat3Select" onchange="updateSelection('lat3')"><option value="">-- SELECT --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-tv"></i> Latino 4</label>
-                <select id="lat4Select" onchange="updateSelection('lat4')"><option value="">-- SELECT --</option></select>
-            </div>
-            <div class="select-group">
-                <label><i class="fas fa-play"></i> Latino 6</label>
-                <select id="lat6Select" onchange="updateSelection('lat6')"><option value="">-- SELECT --</option></select>
-            </div>
-
-            <div class="action-area">
-                <button class="btn btn-native" onclick="playNative()"><i class="fas fa-play"></i> STREAM</button>
-                <button class="btn btn-vlc" onclick="openVLC()"><i class="fas fa-external-link-alt"></i> VLC</button>
-            </div>
-        </div>
-
-        <div id="status" class="status-bar">SYSTEM READY. SELECT CHANNEL.</div>
-
-        <div class="player-wrapper">
-            <video id="video" controls autoplay playsinline></video>
-        </div>
+    <div class="controls-grid" id="masterGrid">
+        <!-- Generado dinámicamente -->
     </div>
 
-    <script>
-        const playlists = {
-            intl: ` BabyFirst,http://45.181.121.85:25461/test/test/2|Cartoon Network,http://45.181.121.85:25461/test/test/4|Nickelodeon,http://45.181.121.85:25461/test/test/5|Nick Jr,http://45.181.121.85:25461/test/test/6|Disney JR,http://45.181.121.85:25461/test/test/7|Disney Channel,http://45.181.121.85:25461/test/test/8|Discovery Kids,http://45.181.121.85:25461/test/test/9|Baby TV,http://45.181.121.85:25461/test/test/10|AMC Series,http://45.181.121.85:25461/test/test/24|BBC NEWS,http://45.181.121.85:25461/test/test/25|24 HORAS,http://45.181.121.85:25461/test/test/26|AE Mundo,http://45.181.121.85:25461/test/test/28|ATV,http://45.181.121.85:25461/test/test/30|AXN,http://45.181.121.85:25461/test/test/32|Adult Swim,http://45.181.121.85:25461/test/test/33|Animal Planet,http://45.181.121.85:25461/test/test/35|Antena 3,http://45.181.121.85:25461/test/test/37|Bethel TV,http://45.181.121.85:25461/test/test/39|Canal 13,http://45.181.121.85:25461/test/test/40|CHV,http://45.181.121.85:25461/test/test/41|CNN Chile,http://45.181.121.85:25461/test/test/42|CNN Español,http://45.181.121.85:25461/test/test/43|Las Estrellas,http://45.181.121.85:25461/test/test/47|Cinecanal,http://45.181.121.85:25461/test/test/50|Cinemax,http://45.181.121.85:25461/test/test/52|DW Español,http://45.181.121.85:25461/test/test/54|De Pelicula,http://45.181.121.85:25461/test/test/55|Discovery Channel,http://45.181.121.85:25461/test/test/56|Discovery Science,http://45.181.121.85:25461/test/test/59|Discovery Turbo,http://45.181.121.85:25461/test/test/60|E Entertainment,http://45.181.121.85:25461/test/test/64|ESPN,http://45.181.121.85:25461/test/test/65|ESPN 2,http://45.181.121.85:25461/test/test/66|ESPN 3,http://45.181.121.85:25461/test/test/67|ESPN 5,http://45.181.121.85:25461/test/test/68|EWTN,http://45.181.121.85:25461/test/test/73|Enlace,http://45.181.121.85:25461/test/test/75|Esne,http://45.181.121.85:25461/test/test/76|Rec TV,http://45.181.121.85:25461/test/test/77|FX,http://45.181.121.85:25461/test/test/80|Film&Arts,http://45.181.121.85:25461/test/test/81|France 24,http://45.181.121.85:25461/test/test/84|Global,http://45.181.121.85:25461/test/test/86|Golden Edge,http://45.181.121.85:25461/test/test/87|Golf Channel,http://45.181.121.85:25461/test/test/89|HBO 2,http://45.181.121.85:25461/test/test/90|HBO Family,http://45.181.121.85:25461/test/test/91|HBO Mundi,http://45.181.121.85:25461/test/test/94|HBO Plus,http://45.181.121.85:25461/test/test/96|HBO Signature,http://45.181.121.85:25461/test/test/97|HBO Xtreme SD,http://45.181.121.85:25461/test/test/99|HBO,http://45.181.121.85:25461/test/test/100|HGTV,http://45.181.121.85:25461/test/test/101|HTV,http://45.181.121.85:25461/test/test/103|History 2,http://45.181.121.85:25461/test/test/104|History Channel,http://45.181.121.85:25461/test/test/105|Home and Health,http://45.181.121.85:25461/test/test/107|Investigation Discovery,http://45.181.121.85:25461/test/test/108|La Red,http://45.181.121.85:25461/test/test/111|MTV,http://45.181.121.85:25461/test/test/115|Mega,http://45.181.121.85:25461/test/test/117|NTN 24 Horas,http://45.181.121.85:25461/test/test/118|National Geographic,http://45.181.121.85:25461/test/test/120|OROMAR TV,http://45.181.121.85:25461/test/test/122|Panamericana,http://45.181.121.85:25461/test/test/124|RAI,http://45.181.121.85:25461/test/test/126|RPP,http://45.181.121.85:25461/test/test/128|RTU,http://45.181.121.85:25461/test/test/129|STAR Channel,http://45.181.121.85:25461/test/test/130|Sony,http://45.181.121.85:25461/test/test/134|Studio Universal,http://45.181.121.85:25461/test/test/139|TCM,http://45.181.121.85:25461/test/test/142|TLC,http://45.181.121.85:25461/test/test/143|TNT,http://45.181.121.85:25461/test/test/144|TNT Novelas,http://45.181.121.85:25461/test/test/145|TNT Sports,http://45.181.121.85:25461/test/test/147|TVE,http://45.181.121.85:25461/test/test/150|TVN,http://45.181.121.85:25461/test/test/151|Telemundo,http://45.181.121.85:25461/test/test/152|Telenovelas,http://45.181.121.85:25461/test/test/153|Tooncast,http://45.181.121.85:25461/test/test/154|USA,http://45.181.121.85:25461/test/test/160|Universal,http://45.181.121.85:25461/test/test/161|Via X Esports,http://45.181.121.85:25461/test/test/163|Via X,http://45.181.121.85:25461/test/test/164|Warner Channel,http://45.181.121.85:25461/test/test/166|Space,http://45.181.121.85:25461/test/test/136|CGTN,http://45.181.121.85:25461/test/test/177|Telefe,http://45.181.121.85:25461/test/test/180|Love Nature,http://45.181.121.85:25461/test/test/181|Food Network,http://45.181.121.85:25461/test/test/182|Daystar,http://45.181.121.85:25461/test/test/186|Clover,http://45.181.121.85:25461/test/test/188|13C,http://45.181.121.85:25461/test/test/189|Europra Europa,http://45.181.121.85:25461/test/test/190|Bio Bio,http://45.181.121.85:25461/test/test/168|Red Geminis,http://45.181.121.85:25461/test/test/169|Chanquina,http://45.181.121.85:25461/test/test/170|Radio Imagina,http://45.181.121.85:25461/test/test/172|Radio Pudahuel,http://45.181.121.85:25461/test/test/173|Favorita,http://45.181.121.85:25461/test/test/175|Radio Corazon,http://45.181.121.85:25461/test/test/176|Fm Dos,http://45.181.121.85:25461/test/test/174|CHV HD,http://45.181.121.85:25461/test/test/11|Discovery Theater HD,http://45.181.121.85:25461/test/test/13|ESPN 2 HD,http://45.181.121.85:25461/test/test/14|ESPN 3 HD,http://45.181.121.85:25461/test/test/15|ESPN 4 HD,http://45.181.121.85:25461/test/test/16|ESPN 6 HD,http://45.181.121.85:25461/test/test/17|ESPN HD,http://45.181.121.85:25461/test/test/18|Latina HD,http://45.181.121.85:25461/test/test/20|TNT HD,http://45.181.121.85:25461/test/test/21|TNT Series HD,http://45.181.121.85:25461/test/test/22|TVN HD,http://45.181.121.85:25461/test/test/23|A&E HD,http://45.181.121.85:25461/test/test/27|AMC,http://45.181.121.85:25461/test/test/29|AXN HD,http://45.181.121.85:25461/test/test/31|America TV HD,http://45.181.121.85:25461/test/test/34|Animal Planet HD,http://45.181.121.85:25461/test/test/36|Atres Series,http://45.181.121.85:25461/test/test/38|Canal 13 HD,http://45.181.121.85:25461/test/test/45|Cartoon Network HD,http://45.181.121.85:25461/test/test/48|Cinecanal HD,http://45.181.121.85:25461/test/test/51|DHE HD,http://45.181.121.85:25461/test/test/53|Discovery Channel HD,http://45.181.121.85:25461/test/test/57|Discovery Kids HD,http://45.181.121.85:25461/test/test/58|Discovery World HD,http://45.181.121.85:25461/test/test/61|Disney Channel HD,http://45.181.121.85:25461/test/test/62|ESPN 5 HD,http://45.181.121.85:25461/test/test/69|ESPN 7 HD,http://45.181.121.85:25461/test/test/70|El Gourmet HD,http://45.181.121.85:25461/test/test/74|FX HD,http://45.181.121.85:25461/test/test/79|HBO Family HD,http://45.181.121.85:25461/test/test/92|HBO HD,http://45.181.121.85:25461/test/test/93|HBO POP HD,http://45.181.121.85:25461/test/test/95|HBO Xtreme HD,http://45.181.121.85:25461/test/test/98|History Channel HD,http://45.181.121.85:25461/test/test/106|Investigation Discovery HD,http://45.181.121.85:25461/test/test/109|Las Estrellas HD,http://45.181.121.85:25461/test/test/112|MEGA HD,http://45.181.121.85:25461/test/test/114|MTV HD,http://45.181.121.85:25461/test/test/116|Nat Geo HD,http://45.181.121.85:25461/test/test/119|Nickelodeon HD,http://45.181.121.85:25461/test/test/121|Sony HD,http://45.181.121.85:25461/test/test/132|Space HD,http://45.181.121.85:25461/test/test/135|Star Channel HD,http://45.181.121.85:25461/test/test/137|Stingray Concerts HD,http://45.181.121.85:25461/test/test/138|Studio Universal HD,http://45.181.121.85:25461/test/test/140|Sun Channel HD,http://45.181.121.85:25461/test/test/141|TNT Novelas HD,http://45.181.121.85:25461/test/test/146|Universal Channel HD,http://45.181.121.85:25461/test/test/159|Warner HD,http://45.181.121.85:25461/test/test/165|Pasiones HD,http://45.181.121.85:25461/test/test/178|Hei HD,http://45.181.121.85:25461/test/test/179|TV+,http://45.181.121.85:25461/test/test/183|Exitosa TV,http://45.181.121.85:25461/test/test/185|Comedia Central HD,http://45.181.121.85:25461/test/test/63|ESPN Premium HD,http://45.181.121.85:25461/test/test/19|TNT Sports Premiun HD,http://45.181.121.85:25461/test/test/149|TNT Sports Premium,http://45.181.121.85:25461/test/test/148|Playboy HD,http://45.181.121.85:25461/test/test/125|Sextreme,http://45.181.121.85:25461/test/test/131|Venus,http://45.181.121.85:25461/test/test/162`,
-            it: `Rai 1,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2725|Rai 2,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2724|Rai 3,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2723|Rete 4,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2709|Canale 5,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2768|Italia 1,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2741|La7,https://jmp2.uk/stvp-ITBD1500002NL|TV8,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28458|NOVE,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2759|20 Mediaset,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2739|Rai 4,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2722|Iris,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28431|Rai 5,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2721|Rai Movie,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2719|Rai Premium,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2717|Cielo,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2764|27 Twentyseven,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2753|TV2000,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28457|La7 Cinema,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2742|La 5,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2743|Real Time,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2711|DMAX,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2757|Food Network,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2751|Cine34,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2738|Focus,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2760|RTL 102.5,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2705|Discovery,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2761|Giallo,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2748|Top Crime,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28461|Italia Due,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28435|Boing,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2770|Rai Gulp,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2720|Rai YoYo,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2712|Frisbee,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28440|Super!,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28466|Cartoon Network,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2767|Cartoonito,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2766|Comedy Central,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2765|Rai News 24,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2718|TG Com 24,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28464|TG Norba 24,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28463|Rai Sport,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2715|Sportitalia,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28469|Sportitalia Solo Calcio,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28468|Supertennis,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28467|Motor Trend,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28439|ACI Sport TV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28438|Deejay TV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2762|Radio 51 TV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28441|TVA Vicenza,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28460|Umbria TV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2708|Senato TV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2703|Camera Dei Deputati,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2769|San Marino RTV,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2704|RSI La 1,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2707|RSI La 2,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2706|Sky TG24,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28471|Sky Uno,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28470|SKY PRIMAFILA 1 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2732|SKY PRIMAFILA 2 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2731|SKY PRIMAFILA 3 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2730|SKY PRIMAFILA 4 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2729|SKY ATLANTIC,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2702|SKY CINEMA ACTION,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2701|SKY CINEMA COMEDY,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2700|SKY CINEMA DUE,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2699|SKY CINEMA FAMILY,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2698|SKY CINEMA SUSPENSE,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2697|SKY CINEMA UNO,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2696|SKY PRIMAFILA 5 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2695|SKY PRIMAFILA 6 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2694|SKY PRIMAFILA 7 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2693|SKY PRIMAFILA 8 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2692|SKY PRIMAFILA 9 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2691|SKY PRIMAFILA PREMIERE,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2690|SKY PRIMAFILA SUPER,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2689|SKY SPORT ARENA,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2688|SKY SPORT CALCIO,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2687|SKY SPORT F1,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2686|SKY SPORT FOOTBALL,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2685|SKY SPORT GOLF,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2684|SKY SPORT MOTOGP,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28473|SKY SPORT NBA,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28472|SKY CINEMA ACTION,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28437|SKY CINEMA COLLECTION,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28434|SKY CINEMA UNO PLUS 24,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28433|Rete 4 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/2710|Italia 1 HD,http://esk240901.abcnew.site:8880/Mattes/ddsdMattes1234/28436`,
-            it2: `3SAT,http://5.180.164.197:8080/3SAT/index.m3u8|BLOOMBERG,http://5.180.164.197:8080/BLOOMBERG/index.m3u8|CNBC,http://5.180.164.197:8080/CNBC/index.m3u8|CNN,http://5.180.164.197:8080/CNN/index.m3u8|COMEDY CENTRAL,http://5.180.164.197:8080/COMEDYCENTRAL/index.m3u8|DAS ERSTE,http://5.180.164.197:8080/DASERSTE/index.m3u8|FRANCE 24 EN,http://5.180.164.197:8080/FRANCE24EN/index.m3u8|FRANCE 24 FR,http://5.180.164.197:8080/FRANCE24FR/index.m3u8|KABEL 1,http://5.180.164.197:8080/KABEL1/index.m3u8|KABEL 1 DOKU,http://5.180.164.197:8080/KABEL1DOKU/index.m3u8|NTV,http://5.180.164.197:8080/NTV/index.m3u8|ONE,http://5.180.164.197:8080/ONE/index.m3u8|PRO 7,http://5.180.164.197:8080/PRO7/index.m3u8|PRO 7 MAXX,http://5.180.164.197:8080/PRO7MAXX/index.m3u8|RTL,http://5.180.164.197:8080/RTL/index.m3u8|RTL 2,http://5.180.164.197:8080/RTL2/index.m3u8|SAT 1,http://5.180.164.197:8080/SAT1/index.m3u8|SAT 1 GOLD,http://5.180.164.197:8080/SAT1GOLD/index.m3u8|SIXX,http://5.180.164.197:8080/SIXX/index.m3u8|SKY NEWS,http://5.180.164.197:8080/SKYNEWS/index.m3u8|SUPER RTL,http://5.180.164.197:8080/SUPERRTL/index.m3u8|TV5 MONDE,http://5.180.164.197:8080/TV5MONDE/index.m3u8|VOX,http://5.180.164.197:8080/VOX/index.m3u8|WELT,http://5.180.164.197:8080/WELT/index.m3u8|ZDF,http://5.180.164.197:8080/ZDF/index.m3u8|ZDF NEO,http://5.180.164.197:8080/ZDFNEO/index.m3u8`,
-            lat: `Animal Planet,http://190.83.85.68/animal_planet/index.m3u8|AXN,http://190.83.85.68/axn/index.m3u8|Boomerang,http://190.83.85.68/boomerang/index.m3u8|Cartoon Network,http://190.83.85.68/cartoon/index.m3u8|Cinemax,http://190.83.85.68/cinemax/index.m3u8|CNBC,http://190.83.85.68/cnbc/index.m3u8|Discovery,http://190.83.85.68/discovery/index.m3u8|Discovery Science,http://190.83.85.68/discovery_science/index.m3u8|Discovery World,http://190.83.85.68/discovery_world/index.m3u8|DW,http://190.83.85.68/dw/index.m3u8|ESPN,http://190.83.85.68/espn/index.m3u8|ESPN 2,http://190.83.85.68/espn2/index.m3u8|Euronews,http://190.83.85.68/euronews/index.m3u8|Fashion TV,http://190.83.85.68/fashion_tv/index.m3u8|Fox Sports 2,http://190.83.85.68/fox_sports_2/index.m3u8|H2,http://190.83.85.68/h2/index.m3u8|HBO,http://190.83.85.68/hbo/index.m3u8|HBO 2,http://190.83.85.68/hbo2/index.m3u8|HBO Family,http://190.83.85.68/hbo_family/index.m3u8|HGTV,http://190.83.85.68/hgtv/index.m3u8|History,http://190.83.85.68/history/index.m3u8|Investigation Discovery,http://190.83.85.68/id/index.m3u8|ISTV,http://190.83.85.68/istv/index.m3u8|Lider,http://190.83.85.68/lider/index.m3u8|Music Box,http://190.83.85.68/music_box/index.m3u8|Sony,http://190.83.85.68/sony/index.m3u8|TCM,http://190.83.85.68/tcm/index.m3u8|TLC,http://190.83.85.68/tlc/index.m3u8|TNT,http://190.83.85.68/tnt/index.m3u8|Tooncast,http://190.83.85.68/tooncast/index.m3u8|Globo,http://190.83.85.68/globo/index.m3u8|TruTV,http://190.83.85.68/trutv/index.m3u8|ESPN 3,http://190.83.85.68/espn3/index.m3u8|ESPN 4,http://190.83.85.68/espn4/index.m3u8|SBT,http://190.83.85.68/sbt/index.m3u8|Space,http://190.83.85.68/space/index.m3u8|Agromais,http://190.83.85.68/agromais/index.m3u8|Telesur,http://190.83.85.68/telesur/index.m3u8`,
-            lat2: `Animal Planet HD,http://45.190.13.8/AnimalPlanetHD/index.m3u8|Antena 3,http://45.190.13.8/Antena3/index.m3u8|AXN HD,http://45.190.13.8/AXNHD/index.m3u8|Baby TV,http://45.190.13.8/BabyTV/index.m3u8|BBC News,http://45.190.13.8/BBCNews/index.m3u8|Discovery Science,http://45.190.13.8/DiscoveryScience/index.m3u8|Discovery Turbo,http://45.190.13.8/DiscoveryTurbo/index.m3u8|Disney Junior,http://45.190.13.8/DisneyJunior/index.m3u8|France 24,http://45.190.13.8/France24/index.m3u8|H2,http://45.190.13.8/H2/index.m3u8|HGTV,http://45.190.13.8/HGTV/index.m3u8|History HD,http://45.190.13.8/HistoryHD/index.m3u8|Lifetime,http://45.190.13.8/Lifetime/index.m3u8|NatGeo HD,http://45.190.13.8/NatGeoHD/index.m3u8|RT HD,http://45.190.13.8/RTHD/index.m3u8|TCM,http://45.190.13.8/TCM/index.m3u8|TLC,http://45.190.13.8/TLC/index.m3u8|Tooncast,http://45.190.13.8/Tooncast/index.m3u8|VTV,http://45.190.13.8/VTV/index.m3u8|Canal 11,http://45.190.13.8/Canal11/index.m3u8|Cinemax,http://45.190.13.8/Cinemax/index.m3u8|Adult Swim,http://45.190.13.8/AdultSwim/index.m3u8|TNT Novelas,http://45.190.13.8/TNTNovelas/index.m3u8|Universal TV,http://45.190.13.8/UniversalTV/index.m3u8|ADN 40,http://45.190.13.8/ADN40/index.m3u8|Multipremier,http://45.190.13.8/Multipremier/index.m3u8|HTV,http://45.190.13.8/HTV/index.m3u8|RCN Novelas,http://45.190.13.8/RCNNovelas/index.m3u8`,
-            lat3: `BTV,http://103.165.93.31:8095/btv/index.m3u8|NTV,http://103.165.93.31:8095/ntv/index.m3u8|PTV,http://103.165.93.31:8095/ptv/index.m3u8|T Sports,http://103.165.93.31:8095/tsports/index.m3u8|SABC 3,http://195.128.27.177/SABC3/index.m3u8|AMC HD,http://45.235.37.228/amchd/index.m3u8|Antena 3,http://45.235.37.228/antena3/index.m3u8|AXN HD,http://45.235.37.228/axnhd/index.m3u8|Baby TV,http://45.235.37.228/babytv/index.m3u8|Boomerang,http://45.235.37.228/boomerang/index.m3u8|Discovery HD,http://45.235.37.228/discoveryhd/index.m3u8|Mega HD,http://45.235.37.228/megahd/index.m3u8|NatGeo HD,http://45.235.37.228/natgeohd/index.m3u8|Nick HD,http://45.235.37.228/nickhd/index.m3u8|Sony HD,http://45.235.37.228/sonyhd/index.m3u8|TNT HD,http://45.235.37.228/tnthd/index.m3u8|Tooncast,http://45.235.37.228/tooncast/index.m3u8|Cine Latino,http://45.235.37.228/cinelatino/index.m3u8|Adult Swim,http://45.235.37.254/adultswim/index.m3u8|Boing,http://185.47.212.25/Boing/index.m3u8|Neox,http://185.47.212.25/neox/index.m3u8|Nova,http://185.47.212.25/nova/index.m3u8|Divinity,http://185.47.212.25/Divinity/index.m3u8|Energy,http://185.47.212.25/Energy/index.m3u8|TEN,http://185.47.212.25/TEN/index.m3u8|DMAX,http://185.47.212.25/DMAX/index.m3u8|SVT 24,http://185.47.212.25/svt24/index.m3u8|SBT,http://200.77.176.130/SBT/index.m3u8|Baby TV 2,http://38.19.41.46:8081/babytv/index.m3u8|Cinemax 2,http://38.19.41.46:8081/CINEMAX/index.m3u8|ESPN,http://38.19.41.46:8081/ESPN/index.m3u8|MTV,http://38.19.41.46:8081/MTV/index.m3u8`,
-            lat4: `A&E HD,http://179.63.6.209:8000/play/a006|AXN HD,http://179.63.6.209:8000/play/a007|NatGeo HD,http://179.63.6.209:8000/play/a005|ESPN 6 HD,http://179.63.6.209:8000/play/a095|ESPN 7 HD,http://179.63.6.209:8000/play/a076|LIGA 1 MAX HD,http://179.63.6.209:8000/play/a0cr|AMC HD,http://179.63.6.209:8000/play/a0ao|AMC SERIES HD,http://179.63.6.209:8000/play/a0an|ATV+ HD,http://179.63.6.209:8000/play/a0b8|AZ CORAZON,http://179.63.6.209:8000/play/a08t|BABY TV HD,http://179.63.6.209:8000/play/a08q|GOLDEN PREMIERE 2,http://179.63.6.209:8000/play/a08r|LATINA,http://179.63.6.209:8000/play/a08p|LIGA 1 HD,http://179.63.6.209:8000/play/a0cq|STAR CHANNEL HD,http://179.63.6.209:8000/play/a08w|TASTEMADE,http://179.63.6.209:8000/play/a00e|HISTORY 2 HD,http://179.63.6.209:8000/play/a008|HISTORY HD,http://179.63.6.209:8000/play/a009|LIFETIME HD,http://179.63.6.209:8000/play/a00c|DSPORT,http://179.63.6.209:8000/play/a08e|DSPORT 2,http://179.63.6.209:8000/play/a00f|ANIMAL PLANET HD,http://179.63.6.209:8000/play/a00g|CARTOON NETWORK HD,http://179.63.6.209:8000/play/a08x|CINEMAX HD,http://179.63.6.209:8000/play/a0bc|DISCOVERY H&H HD,http://179.63.6.209:8000/play/a087|DISCOVERY KIDS HD,http://179.63.6.209:8000/play/a083|DISCOVERY THEATER HD,http://179.63.6.209:8000/play/a08b|FOOD NETWORK HD,http://179.63.6.209:8000/play/a08a|HBO 2 HD,http://179.63.6.209:8000/play/a00o|HBO FAMILY HD,http://179.63.6.209:8000/play/a00p|HBO HD,http://179.63.6.209:8000/play/a088|HBO SIGNATURE HD,http://179.63.6.209:8000/play/a00s|HBO XTREME HD,http://179.63.6.209:8000/play/a00r|HBO+ HD,http://179.63.6.209:8000/play/a00n|TLC HD,http://179.63.6.209:8000/play/a00d|TNT HD,http://179.63.6.209:8000/play/a00m|TNT SERIES HD,http://179.63.6.209:8000/play/a00q|UNIVERSAL CINEMA,http://179.63.6.209:8000/play/a08h|UNIVERSAL COMEDY,http://179.63.6.209:8000/play/a00h|UNIVERSAL PREMIERE,http://179.63.6.209:8000/play/a08j|SONY CHANNEL HD,http://179.63.6.209:8000/play/a00a|SONY MOVIE HD,http://179.63.6.209:8000/play/a00b|WILLAX HD,http://179.63.5.46:8000/play/a06e/index.m3u8|GLOBAL HD,http://179.63.5.46:8000/play/a06c/index.m3u8|ATV HD,http://179.63.5.46:8000/play/a06a/index.m3u8|EXITOSA HD,http://179.63.5.46:8000/play/a06f/index.m3u8|TV PERU HD,http://179.63.5.46:8000/play/a069/index.m3u8|ATV+ HD 2,http://179.63.5.46:8000/play/a06b/index.m3u8|CADENA TV HD,http://179.63.5.46:8000/play/a06g/index.m3u8|DREAMWORK HD,http://179.63.5.46:8000/play/a06l/index.m3u8|TYC SPORTS HD,http://179.63.5.46:8000/play/a04f/index.m3u8|CINE HISPANO HD,http://179.63.5.46:8000/play/a06r/index.m3u8|CINE FAMILIAR HD,http://179.63.5.46:8000/play/a06s/index.m3u8|FMH MOVIES HD,http://179.63.5.46:8000/play/a06o/index.m3u8|FMH KIDS HD,http://179.63.5.46:8000/play/a06p/index.m3u8|IMPERIAL HD,http://179.63.5.46:8000/play/a06t/index.m3u8|KARIBENA HD,http://179.63.5.46:8000/play/a06u/index.m3u8|CANAL INFANTIL HD,http://179.63.6.209:8010/play/a007|CINE FAMILIAR HD 2,http://179.63.6.209:8010/play/a002|CINE HISPANO HD 2,http://179.63.6.209:8010/play/a006|CINE PREMIUM,http://179.63.6.209:8010/play/a001|MI MUSICA PERU HD,http://179.63.6.209:8010/play/a009|MI MUSICA REGGAETON,http://179.63.6.209:8010/play/a008|MI MUSICA ROMANTICA,http://179.63.6.209:8010/play/a00b|MI MUSICA SALSA,http://179.63.6.209:8010/play/a00a`,
-            lat6: `24 HORAS,http://186.148.196.250:81/play/a0no/index.m3u8|A&E,http://186.148.196.250:81/play/a0o5/index.m3u8|A&E HD,http://186.148.196.250:81/play/a03a/index.m3u8|AMC,http://186.148.196.250:81/play/a0ho/index.m3u8|AMC HD,http://186.148.196.250:81/play/a0ii/index.m3u8|AMC Series,http://186.148.196.250:81/play/a0m6/index.m3u8|ATV,http://186.148.196.250:81/play/a0c4/index.m3u8|ATV SUR,http://186.148.196.250:81/play/a07n/index.m3u8|AXN HD,http://186.148.196.250:81/play/a04l/index.m3u8|Adult Swim,http://186.148.196.250:81/play/a09d/index.m3u8|America TV HD,http://186.148.196.250:81/play/a0ht/index.m3u8|Animal Planet,http://186.148.196.250:81/play/a0el/index.m3u8|Animal Planet HD,http://186.148.196.250:81/play/a04c/index.m3u8|Antena 3,http://186.148.196.250:81/play/a0c9/index.m3u8|Atres Series,http://186.148.196.250:81/play/a0if/index.m3u8|BBC News,http://186.148.196.250:81/play/a0fu/index.m3u8|BETHEL TV,http://186.148.196.250:81/play/a04b/index.m3u8|Baby TV,http://186.148.196.250:81/play/a098/index.m3u8|CANAL 13,http://186.148.196.250:81/play/a0ng/index.m3u8|CCTV-CGTN,http://186.148.196.250:81/play/a0m4/index.m3u8|CHV HD,http://186.148.196.250:81/play/a0co/index.m3u8|CNN Chile,http://186.148.196.250:81/play/a0e0/index.m3u8|CNN Espanol,http://186.148.196.250:81/play/a099/index.m3u8|Canal N,http://186.148.196.250:81/play/a0o6/index.m3u8|Cartoon Network HD,http://186.148.196.250:81/play/a0nw/index.m3u8|Cinecanal HD,http://186.148.196.250:81/play/a0ip/index.m3u8|Cinemax,http://186.148.196.250:81/play/a0g9/index.m3u8|Comedy Central HD,http://186.148.196.250:81/play/a0ia/index.m3u8|DSports,http://186.148.196.250:81/play/a0o4/index.m3u8|DW Espa ol,http://186.148.196.250:81/play/a0ch/index.m3u8|De Pelicula,http://186.148.196.250:81/play/a0g8/index.m3u8|Discovery HD,http://186.148.196.250:81/play/a04d/index.m3u8|Discovery Kids HD,http://186.148.196.250:81/play/a0oc/index.m3u8|Disney Jr,http://186.148.196.250:81/play/a0nn/index.m3u8|ESPN 2 HD,http://186.148.196.250:81/play/a0id/index.m3u8|ESPN 3 HD,http://186.148.196.250:81/play/a0in/index.m3u8|ESPN 4 HD,http://186.148.196.250:81/play/a0io/index.m3u8|ESPN 5 HD,http://186.148.196.250:81/play/a0fy/index.m3u8|ESPN 6 HD,http://186.148.196.250:81/play/a0i7/index.m3u8|ESPN 7 HD,http://186.148.196.250:81/play/a04i/index.m3u8|ESPN Premium HD,http://186.148.196.250:81/play/a0cx/index.m3u8|FX HD,http://186.148.196.250:81/play/a09i/index.m3u8|History Channel HD,http://186.148.196.250:81/play/a04e/index.m3u8|ID HD,http://186.148.196.250:81/play/a04m/index.m3u8|L1 MAX,http://186.148.196.250:81/play/a0hw/index.m3u8|MTV HD,http://186.148.196.250:81/play/a0o4/index.m3u8|Nat Geo HD,http://186.148.196.250:81/play/a04f/index.m3u8|Nickelodeon HD,http://186.148.196.250:81/play/a0ct/index.m3u8|Sony HD,http://186.148.196.250:81/play/a04j/index.m3u8|TNT HD,http://186.148.196.250:81/play/a0nz/index.m3u8|Warner TV HD,http://186.148.196.250:81/play/a0fw/index.m3u8|GOLPERU HD,http://186.148.196.82:8001/play/golperu|LIGA 1 MAX,http://186.148.196.82:8001/play/ligamax1|TyC Sports HD,http://186.148.196.82:8001/play/a0ar`
-        };
+    <div id="status">SISTEMA LISTO. ELIGE UNA FUENTE.</div>
 
-        function populate(id, data) {
-            const el = document.getElementById(id);
-            const items = data.split('|');
-            items.forEach(item => {
-                const parts = item.split(',');
-                if (parts.length < 2) return;
-                const opt = document.createElement('option');
-                opt.value = parts[1].trim();
-                opt.textContent = parts[0].trim();
-                el.appendChild(opt);
-            });
+    <div class="player-wrapper">
+        <div id="interactionShield" onclick="this.style.display='none'">
+            <div class="unlock-btn"><i class="fas fa-play"></i> INICIAR SEÑAL</div>
+        </div>
+        <video id="video" controls autoplay playsinline></video>
+    </div>
+
+    <div class="action-area">
+        <button class="btn btn-native" onclick="playNative()"><i class="fas fa-play"></i> REPRODUCIR</button>
+        <button class="btn btn-vlc" onclick="openVLC()"><i class="fas fa-external-link-alt"></i> ABRIR EN VLC</button>
+    </div>
+</div>
+
+<script>
+    const playlists = {
+        "Icelanders World": `ABC,abc-usa|A&E,a-e|AMC,amc|Animal Planet,animal-planet|BBC America,bbc-america|BBC One,bbc-one-london|BBC Two,bbc-two|beIN Sports,beinsports-usa|Bravo,bravo|Boomerang,boomerang|Cartoon Network,cartoon-network|CBeebies,cbeebies|CBS,cbs|CNBC,cnbc|Comedy Central,comedy-central|CW,the-cw|Discovery,discovery-channel|Discovery Turbo,discovery-turbo|Food Network,food-network|Fox USA,fox-usa|Fox Deportes,fox-deportes|FX,fx|FXM,fxm|FXX,fxx|Freeform,freeform|HBO,hbo-usa|HBO Latino,hbolatino-usa|HBO Comedy,hbocomedy-usa|HBO Drama,hbodrama-usa|HBO Signature,hbosignature-usa|HGTV,hgtv|MTV,mtv|NBC,nbc|Showtime,showtime-usa|STARZ,starz|SYFY,syfy|TBS,tbs|Telemundo,telemundo|TNT,tnt|TruTV,trutv|USA Network,usa-network|WAPA,wapa-america|ACC Network,acc-network|UFC Fight Pass,ufc-fight-pass|Willow Cricket,willow-cricket`,
+
+        "Italy Icelanders": `Rai 1,rai-1|Rai 2,rai-2|Rai 3,rai-3|Rete 4,rete-4|Canale 5,canale-5|Italia 1,italia-1|TV8,tv8|NOVE,nove|Rai 4,rai-4|Iris,iris|Sky Uno,sky-uno|Sky TG24,sky-tg24|Sky Sport Football,sky-sports-football|Sky Sport F1,sky-sports-f1`,
+
+        "Test 45.181 (Lat)": `BabyFirst,http://45.181.121.85:25461/test/test/2|Cartoon Network,http://45.181.121.85:25461/test/test/4|Nickelodeon,http://45.181.121.85:25461/test/test/5|Disney Channel,http://45.181.121.85:25461/test/test/8|AMC Series,http://45.181.121.85:25461/test/test/24|BBC NEWS,http://45.181.121.85:25461/test/test/25|AXN,http://45.181.121.85:25461/test/test/32|ESPN 2,http://45.181.121.85:25461/test/test/66|HBO,http://45.181.121.85:25461/test/test/100|TNT Sports,http://45.181.121.85:25461/test/test/147`,
+
+        "Test 45.122 (HD)": `A&E HD,http://45.181.122.46:8090/play/a00d|AMC HD,http://45.181.122.46:8090/play/a027|AXN HD,http://45.181.122.46:8090/play/a00g|CHV HD,http://45.181.122.46:8090/play/a01o|ESPN 2 HD,http://45.181.122.46:8090/play/a01v|HBO HD,http://45.181.122.46:8090/play/a029|Sony HD,http://45.181.122.46:8090/play/a00e|Warner HD,http://45.181.122.46:8090/play/a00f`,
+
+        "Euro Signals (5.180)": `3SAT,http://5.180.164.197:8080/3SAT/index.m3u8|BLOOMBERG,http://5.180.164.197:8080/BLOOMBERG/index.m3u8|CNN,http://5.180.164.197:8080/CNN/index.m3u8|RTL,http://5.180.164.197:8080/RTL/index.m3u8|ZDF,http://5.180.164.197:8080/ZDF/index.m3u8|SKY NEWS,http://5.180.164.197:8080/SKYNEWS/index.m3u8`,
+
+        "Latino VIP (190.83)": `Animal Planet,http://190.83.85.68/animal_planet/index.m3u8|AXN,http://190.83.85.68/axn/index.m3u8|HBO,http://190.83.85.68/hbo/index.m3u8|ESPN,http://190.83.85.68/espn/index.m3u8|TNT,http://190.83.85.68/tnt/index.m3u8|Globo,http://190.83.85.68/globo/index.m3u8|TUDN,http://190.83.2.182:8090/TUDN/index.m3u8`,
+
+        "Latino 2 HD (45.190)": `AnimalPlanet HD,http://45.190.13.8/AnimalPlanetHD/index.m3u8|AXN HD,http://45.190.13.8/AXNHD/index.m3u8|NatGeo HD,http://45.190.13.8/NatGeoHD/index.m3u8|Universal TV,http://45.190.13.8/UniversalTV/index.m3u8|Multipremier,http://45.190.13.8/Multipremier/index.m3u8`,
+
+        "Latino 3 (Mixed)": `BTV,http://103.165.93.31:8095/btv/index.m3u8|SABC 3,http://195.128.27.177/SABC3/index.m3u8|AMC HD,http://45.235.37.228/amchd/index.m3u8|Boing,http://185.47.212.25/Boing/index.m3u8|SBT,http://200.77.176.130/SBT/index.m3u8`,
+
+        "Global 179 (OLE)": `A&E HD,http://179.63.6.209:8000/play/a006|ESPN 6 HD,http://179.63.6.209:8000/play/a095|HBO FAMILY,http://179.63.6.209:8000/play/a00p|LIGA 1 MAX,http://179.63.6.209:8000/play/a0cr|WILLAX HD,http://179.63.5.46:8000/play/a06e/index.m3u8|TYC SPORTS HD,http://179.63.5.46:8000/play/a04f/index.m3u8`,
+
+        "Pro 186 (Special)": `24 HORAS,http://186.148.196.250:81/play/a0no/index.m3u8|AMC HD,http://186.148.196.250:81/play/a0ii/index.m3u8|GOLPERU HD,http://186.148.196.82:8001/play/golperu|LIGA 1 MAX,http://186.148.196.82:8001/play/ligamax1|TyC Sports HD,http://186.148.196.82:8001/play/a0ar`
+    };
+
+    const grid = document.getElementById('masterGrid');
+    let currentUrl = "";
+    let hls;
+    const video = document.getElementById('video');
+
+    // Inicializar Selects
+    Object.keys(playlists).forEach((name, idx) => {
+        const group = document.createElement('div');
+        group.className = 'select-group';
+        group.innerHTML = `<label>${name}</label><select id="select${idx}" onchange="updateMaster(${idx})"><option value="">-- ELIGE --</option></select>`;
+        grid.appendChild(group);
+
+        const sel = document.getElementById(`select${idx}`);
+        playlists[name].split('|').forEach(item => {
+            const [label, url] = item.split(',');
+            const opt = document.createElement('option');
+            opt.value = url.includes('http') ? url : `https://logic.icelanders.st/embed/${url}`;
+            opt.textContent = label;
+            sel.appendChild(opt);
+        });
+    });
+
+    function updateMaster(activeIdx) {
+        for(let i=0; i<10; i++) {
+            if(i !== activeIdx) document.getElementById(`select${i}`).value = "";
         }
+        const activeSel = document.getElementById(`select${activeIdx}`);
+        currentUrl = activeSel.value;
+        document.getElementById('status').textContent = "SELECCIONADO: " + activeSel.options[activeSel.selectedIndex].text;
+    }
 
-        Object.keys(playlists).forEach(key => populate(key + 'Select', playlists[key]));
-
-        let hls;
-        const video = document.getElementById('video');
-        let currentUrl = "";
-        const selects = ['intlSelect', 'itSelect', 'it2Select', 'latSelect', 'lat2Select', 'lat3Select', 'lat4Select', 'lat6Select'];
-
-        function updateSelection(type) {
-            selects.forEach(s => { if (!s.startsWith(type)) document.getElementById(s).value = ""; });
-            const activeSelect = document.getElementById(type + 'Select');
-            currentUrl = activeSelect.value;
-            document.getElementById('status').textContent = "SYSTEM LOCKED ON: " + activeSelect.options[activeSelect.selectedIndex].text;
+    function playNative() {
+        if (!currentUrl) return;
+        document.getElementById('status').textContent = "SINCRONIZANDO...";
+        document.getElementById('interactionShield').style.display = 'block';
+        if (hls) hls.destroy();
+        if (Hls.isSupported()) {
+            hls = new Hls({maxBufferLength: 30});
+            hls.loadSource(currentUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+            hls.on(Hls.Events.ERROR, (e,data) => { if(data.fatal) hls.recoverMediaError(); });
+        } else {
+            video.src = currentUrl;
+            video.play().catch(() => { document.getElementById('status').textContent = "ERROR: USA VLC"; });
         }
+    }
 
-        function playNative() {
-            if (!currentUrl) return;
-            document.getElementById('status').textContent = "INITIALIZING STREAM...";
-            if (hls) hls.destroy();
-            if (Hls.isSupported()) {
-                hls = new Hls({maxBufferLength: 30, enableWorker: true});
-                hls.loadSource(currentUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-                hls.on(Hls.Events.ERROR, (event, data) => { if(data.fatal) hls.recoverMediaError(); });
-            } else {
-                video.src = currentUrl;
-                video.play().catch(e => { document.getElementById('status').textContent = "DEVICE NOT SUPPORTED. USE VLC."; });
-            }
-        }
-
-        function openVLC() {
-            if (!currentUrl) return;
-            window.location.href = "vlc://" + currentUrl;
-        }
-    </script>
+    function openVLC() {
+        if (!currentUrl) return;
+        window.location.href = "vlc://" + currentUrl;
+    }
+</script>
 </body>
 </html>
