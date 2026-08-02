@@ -42,11 +42,11 @@ public class MainActivity extends Activity {
         myWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.startsWith("vlc://")) {
-                    String cleanUrl = url.replace("vlc://", "");
+                if (url.startsWith("vlc://") || url.startsWith("play://")) {
+                    boolean forceVlc = url.startsWith("vlc://");
+                    String cleanUrl = url.replace("vlc://", "").replace("play://", "");
                     
-                    // --- LÓGICA XTREAM ---
-                    // Si el link no tiene extensión, suele ser Xtream Codes. Le añadimos .ts para mayor compatibilidad
+                    // Si el link no tiene extensión, le añadimos .ts para compatibilidad
                     if (!cleanUrl.contains(".") || cleanUrl.endsWith("/")) {
                         cleanUrl = cleanUrl + ".ts";
                     }
@@ -54,16 +54,19 @@ public class MainActivity extends Activity {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.parse(cleanUrl), "video/*");
                     
-                    // Intentamos forzar VLC, pero sin fallar si no existe
-                    try {
-                        intent.setPackage("org.videolan.vlc");
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        // Si no hay VLC, abrimos el selector de Android universal
-                        Intent chooser = Intent.createChooser(new Intent(Intent.ACTION_VIEW)
-                                .setDataAndType(Uri.parse(cleanUrl), "video/*"), "Reproducir con...");
-                        startActivity(chooser);
+                    if (forceVlc) {
+                        try {
+                            intent.setPackage("org.videolan.vlc");
+                            startActivity(intent);
+                            return true;
+                        } catch (Exception e) { 
+                            // Si no hay VLC, cae al selector de abajo
+                        }
                     }
+                    
+                    // Selector universal de Android (Nativo)
+                    Intent chooser = Intent.createChooser(intent, "Reproducir con...");
+                    startActivity(chooser);
                     return true;
                 }
                 return false;

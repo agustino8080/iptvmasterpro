@@ -3,197 +3,178 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>IPTV MASTER — Centro Multimedia</title>
+<title>SEÑAL — Centro Multimedia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.15/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#0A0D12; --bg-raised:#12161D; --bg-inset:#0D1016; --line:#222834;
-    --amber:#F5A623; --teal:#35D0BA; --text:#E7E4DC; --live:#E5484D;
+    --bg:#0A0D12; --bg-raised:#12161D; --bg-inset:#0D1016; --line:#222834; --line-soft:#1A1F28;
+    --amber:#F5A623; --amber-dim:#96671E; --amber-glow:rgba(245,166,35,.35);
+    --teal:#35D0BA; --teal-glow:rgba(53,208,186,.35); --text:#E7E4DC; --text-muted:#8B93A3;
+    --text-dim:#4B525F; --live:#E5484D; --radius:10px;
+    --font-display:'Bebas Neue', sans-serif; --font-head:'Oswald', sans-serif;
+    --font-body:'IBM Plex Sans', sans-serif; --font-mono:'IBM Plex Mono', monospace;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%; margin:0;}
   body{
-    margin:0; background: var(--bg); color:var(--text);
-    font-family:'IBM Plex Sans', sans-serif; overflow:hidden; height:100vh;
+    background: radial-gradient(ellipse 120% 80% at 15% -10%, rgba(245,166,35,.06), transparent 55%), var(--bg);
+    color:var(--text); font-family:var(--font-body); -webkit-font-smoothing:antialiased; overflow:hidden;
   }
   .app{ height:100vh; display:grid; grid-template-rows:auto 1fr; }
-  header{
-    display:flex; align-items:center; padding:10px 20px;
-    background: var(--bg-raised); border-bottom:1px solid var(--line); gap:15px;
+  header.topbar{
+    display:flex; align-items:center; gap:14px; padding:10px 18px;
+    border-bottom:1px solid var(--line-soft); background:linear-gradient(180deg, var(--bg-raised), var(--bg));
   }
-  h1{ font-family:'Bebas Neue'; font-size:24px; color:var(--amber); letter-spacing:2px; margin:0; }
+  .brand h1{ font-family:var(--font-display); font-size:26px; letter-spacing:.06em; margin:0; color:var(--text); }
+  .brand h1 span{color:var(--amber);}
 
-  .search-box{ flex:1; position:relative; max-width:500px; }
-  .search-box input{
-    width:100%; background:var(--bg-inset); border:1px solid var(--line);
-    padding:8px 15px 8px 35px; border-radius:20px; color:white; outline:none;
+  .layout{ display:grid; grid-template-columns:320px 1fr; min-height:0; }
+  aside.sidebar{ border-right:1px solid var(--line-soft); background:var(--bg-raised); overflow-y:auto; }
+  .panel{ padding:16px; display:flex; flex-direction:column; gap:14px; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line);
+    background:var(--bg-inset); color:var(--text); font-family:var(--font-head);
+    font-size:12px; text-transform:uppercase; padding:10px 15px; border-radius:8px; cursor:pointer;
   }
-  .search-box i{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text); font-size:12px; }
+  .btn-primary{ background:var(--amber); color:#1A1204; border-color:var(--amber); font-weight:600; }
 
-  .layout{ display:grid; grid-template-columns:300px 1fr; overflow:hidden; }
-
-  aside{
-    background:var(--bg-raised); border-right:1px solid var(--line);
-    padding:15px; display:flex; flex-direction:column; gap:15px; overflow-y:auto;
-  }
-  .select-block{ display:flex; flex-direction:column; gap:5px; }
-  label{ font-size:10px; text-transform:uppercase; color:var(--amber); font-weight:bold; }
-  select{
-    background:var(--bg-inset); border:1px solid var(--line); color:white;
-    padding:8px; border-radius:8px; font-size:12px; outline:none; cursor:pointer;
+  select.tuner-select{
+    width:100%; background:var(--bg-inset); border:1px solid var(--line); color:white;
+    padding:10px; border-radius:8px; font-size:13px; outline:none; appearance:none;
   }
 
-  main{ background:#000; display:flex; flex-direction:column; position:relative; }
-  .player-container{ flex:1; position:relative; display:flex; align-items:center; justify-content:center; }
+  .current-channel-card{
+    display:flex; align-items:center; gap:10px; border:1px solid var(--line);
+    border-radius:9px; padding:10px; background:var(--bg-inset);
+  }
+  .info .cc-name{ font-family:var(--font-head); font-size:14px; color:var(--amber); }
+
+  /* BOTONES EXTERNOS */
+  .external-actions{ display:flex; gap:8px; margin-top:5px; }
+  .btn-ext{ flex:1; font-size:10px; padding:8px; justify-content:center; }
+  .btn-vlc{ border-color:var(--amber-dim); color:var(--amber); }
+  .btn-nat{ border-color:var(--teal); color:var(--teal); }
+
+  main.stage{ background:#000; position:relative; }
   video{ width:100%; height:100%; object-fit:contain; }
 
-  .action-bar{
-    padding:15px; background:var(--bg-raised); border-top:1px solid var(--line);
-    display:flex; gap:10px;
-  }
-  .btn{
-    flex:1; padding:12px; border-radius:10px; border:none; font-weight:bold;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    text-transform:uppercase; font-size:12px; cursor:pointer; color:white;
-  }
-  .btn-native{ background: linear-gradient(45deg, #1e40af, #3b82f6); }
-  .btn-vlc{ background: linear-gradient(45deg, #ea580c, #f97316); }
-
-  .status-tag{ position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.7); padding:5px 10px; border-radius:5px; font-size:10px; color:var(--teal); border:1px solid var(--teal); }
-
-  @media(max-width:800px){ .layout{ grid-template-columns:1fr; } aside{ display:none; } }
+  @media(max-width:880px){ .layout{ grid-template-columns:1fr; } aside.sidebar{ display:none; } }
 </style>
 </head>
 <body>
 
 <div class="app">
-  <header>
-    <h1>IPTV MASTER <span>PRO</span></h1>
-    <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="BUSCAR CANAL EN TODOS LOS SERVIDORES..." oninput="filterChannels()">
-    </div>
+  <header class="topbar">
+    <div class="brand"><h1>SE<span>Ñ</span>AL</h1></div>
+    <button class="btn" id="openImport" style="margin-left:auto;"><i class="fas fa-plus"></i> Lista</button>
   </header>
 
   <div class="layout">
-    <aside>
-      <div class="select-block">
-        <label>Servidor Maestro</label>
-        <select id="serverSelect" onchange="loadServer()">
-          <option value="">-- ELIGE UN SERVIDOR --</option>
-          <option value="lat1">LATINO 1 (VIPS)</option>
-          <option value="lat2">LATINO 2 (OLE)</option>
-          <option value="lat3">LATINO 3 (CENTRAL)</option>
-          <option value="lat5">LATINO 5 (MIXTO)</option>
-          <option value="esp">ESPAÑA TV</option>
-          <option value="fra">FRANCE & EURO</option>
-          <option value="rb">REDBULL SPORTS</option>
-        </select>
-      </div>
+    <aside class="sidebar">
+      <div class="panel">
+        <select class="tuner-select" id="groupSelect"><option value="">Cargando grupos...</option></select>
+        <select class="tuner-select" id="channelSelect"><option value="">Selecciona canal...</option></select>
 
-      <div class="select-block">
-        <label>Lista de Canales</label>
-        <select id="channelSelect" onchange="selectChannel()"></select>
-      </div>
+        <div class="current-channel-card">
+          <div class="info">
+            <div class="cc-name" id="displayChannelName">Sin Canal</div>
+            <div class="cc-meta">Streaming Pro</div>
+          </div>
+        </div>
 
-      <div style="font-size:10px; color:gray; margin-top:auto;">
-        Soporte: HLS, DASH, TS, FLV <br>
-        Buffer: 30s Optimizado
+        <div class="external-actions">
+           <button class="btn btn-ext btn-nat" onclick="openNative()"><i class="fas fa-play"></i> NATIVO</button>
+           <button class="btn btn-ext btn-vlc" onclick="openVLC()"><i class="fas fa-external-link-alt"></i> VLC</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="playInternal()" style="margin-top:10px;">REPRODUCIR AQUÍ</button>
       </div>
     </aside>
 
-    <main>
-      <div class="status-tag" id="status">SISTEMA INICIADO</div>
-      <div class="player-container">
-        <video id="video" controls autoplay></video>
-      </div>
-      <div class="action-bar">
-        <button class="btn btn-native" onclick="playCurrent()"><i class="fas fa-play"></i> WEB PLAYER</button>
-        <button class="btn btn-vlc" onclick="openVLC()"><i class="fas fa-external-link-alt"></i> VLC EXTERNAL</button>
-      </div>
+    <main class="stage">
+      <video id="video" controls autoplay playsinline></video>
     </main>
   </div>
 </div>
 
-<script>
-  const servers = {
-    lat1: `24 HORAS,http://186.148.196.250:81/play/a0no/index.m3u8|A&E HD,http://186.148.196.250:81/play/a03a/index.m3u8|AMC HD,http://186.148.196.250:81/play/a0ii/index.m3u8|Animal Planet HD,http://186.148.196.250:81/play/a04c/index.m3u8|ESPN 2 HD,http://186.148.196.250:81/play/a0id/index.m3u8|GOLPERU HD,http://186.148.196.82:8001/play/golperu|LIGA 1 MAX,http://186.148.196.82:8001/play/ligamax1`,
-    lat2: `A&E HD OLE,http://179.63.6.209:8000/play/a006|AXN HD OLE,http://179.63.6.209:8000/play/a007|ESPN 6 HD,http://179.63.6.209:8000/play/a095|LIGA 1 MAX HD,http://179.63.6.209:8000/play/a0cr|WILLAX HD,http://179.63.5.46:8000/play/a06e/index.m3u8`,
-    lat3: `A&E HD 177,http://177.10.184.193:8000/play/a0cz/index.m3u8|AMC HD 177,http://177.10.184.193:8000/play/a0d0/index.m3u8|HBO HD 177,http://177.10.184.193:8000/play/a0gg/index.m3u8|AZTECA 7,http://177.10.184.60:8002/play/a00o/index.m3u8`,
-    lat5: `BTV,http://103.165.93.31:8095/btv/index.m3u8|SABC 3,http://195.128.27.177/SABC3/index.m3u8|AMC HD,http://45.235.37.228/amchd/index.m3u8|Boing,http://185.47.212.25/Boing/index.m3u8|SBT,http://200.77.176.130/SBT/index.m3u8`,
-    esp: `La 1,http://79.112.79.166:8069/udp/239.10.20.5:1234|Antena 3,http://79.112.79.166:8069/udp/239.10.20.9:1234|Telecinco,http://79.112.79.166:8069/udp/239.10.20.19:1234`,
-    fra: `FRANCE 24,http://5.180.164.197:8080/FRANCE24EN/index.m3u8|CNN,http://5.180.164.197:8080/CNN/index.m3u8|ZDF,http://5.180.164.197:8080/ZDF/index.m3u8`,
-    rb: `Red Bull AU,https://db34cc6127ac459db55cab5f97cd66b9.mediatailor.us-west-2.amazonaws.com/v1/master/ba62fe743df0fe93366eba3a257d792884136c7f/LINEAR-680-WORBAUENFAST-WHALETVPLUS/680/whaletvplus/hls/master/playlist.m3u8`
-  };
+<div id="importModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; padding:20px;">
+    <div style="background:var(--bg-raised); padding:20px; border-radius:15px; max-width:400px; margin:auto;">
+        <h3>Pegar URL M3U</h3>
+        <input type="text" id="urlInput" placeholder="http://..." style="width:100%; padding:10px; margin:10px 0;">
+        <button class="btn btn-primary" onclick="loadUrl()">CARGAR LISTA</button>
+        <button class="btn" onclick="document.getElementById('importModal').style.display='none'">CERRAR</button>
+    </div>
+</div>
 
+<script>
+  let channels = [];
   let currentUrl = "";
   let hls;
-  let mpegts;
   const video = document.getElementById('video');
 
-  function loadServer() {
-    const val = document.getElementById('serverSelect').value;
-    const chanSel = document.getElementById('channelSelect');
-    chanSel.innerHTML = '<option value="">-- ELIGE CANAL --</option>';
-    if(!val) return;
+  // Recuperar lista guardada
+  window.onload = () => {
+    const saved = localStorage.getItem('playlist');
+    if(saved) {
+        channels = JSON.parse(saved);
+        populateGroups();
+    }
+  };
 
-    servers[val].split('|').forEach(item => {
-      const [name, url] = item.split(',');
-      const opt = document.createElement('option');
-      opt.value = url; opt.textContent = name;
-      chanSel.appendChild(opt);
+  document.getElementById('openImport').onclick = () => document.getElementById('importModal').style.display = 'block';
+
+  async function loadUrl() {
+    const url = document.getElementById('urlInput').value;
+    const res = await fetch(url);
+    const text = await res.text();
+    parseM3U(text);
+    document.getElementById('importModal').style.display = 'none';
+  }
+
+  function parseM3U(text) {
+    const lines = text.split('\n');
+    channels = [];
+    let name = "";
+    lines.forEach(line => {
+        if(line.startsWith('#EXTINF')) name = line.split(',')[1];
+        else if(line.startsWith('http')) {
+            channels.push({name: name || "Canal", url: line.trim()});
+            name = "";
+        }
     });
+    localStorage.setItem('playlist', JSON.stringify(channels));
+    populateGroups();
   }
 
-  function filterChannels() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    if(query.length < 2) return;
-    const chanSel = document.getElementById('channelSelect');
-    chanSel.innerHTML = '<option value="">-- RESULTADOS --</option>';
-
-    Object.values(servers).forEach(list => {
-        list.split('|').forEach(item => {
-            const [name, url] = item.split(',');
-            if(name.toLowerCase().includes(query)) {
-                const opt = document.createElement('option');
-                opt.value = url; opt.textContent = name;
-                chanSel.appendChild(opt);
-            }
-        });
+  function populateGroups() {
+    const sel = document.getElementById('channelSelect');
+    sel.innerHTML = "";
+    channels.forEach((c, i) => {
+        const opt = document.createElement('option');
+        opt.value = c.url; opt.textContent = c.name;
+        sel.appendChild(opt);
     });
+    document.getElementById('groupSelect').innerHTML = "<option>General ("+channels.length+")</option>";
   }
 
-  function selectChannel() {
-    currentUrl = document.getElementById('channelSelect').value;
-    const name = document.getElementById('channelSelect').options[document.getElementById('channelSelect').selectedIndex].text;
-    document.getElementById('status').textContent = "SELECCIONADO: " + name;
-    playCurrent();
-  }
+  document.getElementById('channelSelect').onchange = (e) => {
+    currentUrl = e.target.value;
+    document.getElementById('displayChannelName').textContent = e.target.options[e.target.selectedIndex].text;
+    playInternal();
+  };
 
-  function playCurrent() {
+  function playInternal() {
     if(!currentUrl) return;
     if(hls) hls.destroy();
-    if(mpegts) mpegts.destroy();
-
-    if(currentUrl.includes('.m3u8')) {
-        if(Hls.isSupported()) {
-            hls = new Hls({maxBufferLength: 30});
-            hls.loadSource(currentUrl);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-        } else {
-            video.src = currentUrl;
-            video.play();
-        }
-    } else if (currentUrl.includes('.ts') || currentUrl.includes(':8001') || currentUrl.includes(':8069')) {
-        if(mpegts.isSupported()) {
-            mpegts = mpegts.createPlayer({type: 'mpegts', isLive: true, url: currentUrl});
-            mpegts.attachMediaElement(video);
-            mpegts.load();
-            mpegts.play();
-        }
+    if(Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(currentUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
     } else {
         video.src = currentUrl;
         video.play();
@@ -202,6 +183,10 @@
 
   function openVLC() {
     if(currentUrl) window.location.href = "vlc://" + currentUrl;
+  }
+
+  function openNative() {
+    if(currentUrl) window.location.href = "play://" + currentUrl;
   }
 </script>
 </body>
